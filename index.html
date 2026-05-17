@@ -19,196 +19,230 @@
         input[type=range] { accent-color: #10b981; }
         .spectrum-bar { height: 8px; border-radius: 4px; background: linear-gradient(to right, #10b981, #fbbf24, #ef4444); position: relative; }
         .spectrum-pointer { position: absolute; top: -4px; width: 4px; height: 16px; background: #374151; border-radius: 2px; transition: left 0.3s ease; }
-        .tab-active { border-bottom: 2px solid #059669; color: #059669; font-weight: bold; }
-        .system-tab { white-space: nowrap; }
+        .tab-active { border-bottom: 3px solid #059669 !important; color: #059669 !important; font-weight: 900 !important; }
+        .system-tab { white-space: nowrap; border-bottom: 3px solid transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .sidebar-transition { transition: all 0.3s ease-in-out; }
+        .collapsed .sidebar-content { opacity: 0; pointer-events: none; transform: translateX(-20px); }
+        .collapsed .sidebar-mini-icons { opacity: 1; pointer-events: auto; }
+        
+        .sidebar-mini-icons { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; gap: 2rem; 
+            padding-top: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; 
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-900">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-900 overflow-x-hidden text-[13px]">
 
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-extrabold text-emerald-700 mb-2">Illinois Solar + Battery ROI Calculator</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto">Updated for June 2026 Illinois Shines SREC (50/50 Split) and Battery Arbitrage.</p>
+    <div class="max-w-[1600px] mx-auto px-4 py-6">
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="text-left">
+                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter">Solar ROI Analyst <span class="text-gray-400 font-light">IL 2026</span></h1>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">June 2026 SREC (50/50) & Arbitrage</p>
+                </div>
+            </div>
             
-            <div class="mt-6 flex flex-wrap justify-center gap-2">
-                <button id="shareBtn" onclick="copyShareLink()" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+            <div class="flex flex-wrap gap-2">
+                <button id="shareBtn" onclick="copyShareLink()" class="px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     Copy Share Link
                 </button>
-                <button onclick="exportData()" class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <button onclick="exportData()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 flex items-center transition-all">
                     Export JSON
                 </button>
-                <button onclick="importData()" class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <button onclick="importData()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-50 flex items-center transition-all">
                     Import JSON
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Sidebar: Configuration & Inputs (1/3 of screen) -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="text-xl font-bold flex items-center text-gray-800">System Config</h2>
-                            <button onclick="addSystem()" class="text-emerald-600 hover:text-emerald-700 text-xs font-bold flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Add
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+            
+            <!-- Sidebar -->
+            <div id="settingsSidebar" class="w-full lg:w-96 lg:flex-shrink-0 sidebar-transition overflow-hidden relative">
+                <div class="sidebar-mini-icons">
+                    <button onclick="toggleSidebar()" class="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-emerald-600 hover:bg-emerald-50 transition-all" title="Expand Settings">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <div class="text-gray-300"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                    <div class="text-gray-300"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
+                </div>
+                
+                <div class="sidebar-content w-full lg:w-96 space-y-6 sidebar-transition">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-50">
+                            <h2 class="text-xs font-black text-gray-800 uppercase tracking-[0.2em]">Project Config</h2>
+                            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-emerald-600 transition-colors" title="Collapse Settings">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
-                        <div class="flex flex-wrap gap-1 text-xs" id="systemTabs">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
 
-                    <!-- Global Settings -->
-                    <div class="bg-gray-100 p-4 rounded-xl mb-6 border border-gray-200 space-y-4">
-                        <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Global Project Settings</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Monthly Bill</label>
-                                <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Annual Usage</label>
-                                <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Roof Work $</label>
-                                <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Model Years</label>
-                                <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Active System Config -->
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">SYSTEM NAME</label>
-                            <div class="flex space-x-2">
-                                <input type="text" id="systemName" placeholder="e.g. Premium Quote" oninput="calculate()" class="flex-1 rounded-lg border-gray-300 shadow-sm p-2 text-sm font-bold text-emerald-700">
-                                <button onclick="deleteSystem()" id="deleteBtn" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Utility</label>
-                                <select id="utility" onchange="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs">
-                                    <option value="comed">ComEd</option>
-                                    <option value="ameren">Ameren</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Ownership</label>
-                                <select id="ownership" onchange="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs">
-                                    <option value="owned">Owned</option>
-                                    <option value="third-party">Lease/PPA</option>
-                                </select>
+                        <!-- Global Config -->
+                        <div class="bg-gray-50 p-5 rounded-2xl mb-6 border border-gray-100 space-y-5">
+                            <h3 class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Global Project Context</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Avg. Monthly Bill ($)</label>
+                                    <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-black text-gray-800 focus:ring-2 focus:ring-emerald-500 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Annual Usage (kWh)</label>
+                                    <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-black text-gray-800 focus:ring-2 focus:ring-emerald-500 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Roof Work Cost ($)</label>
+                                    <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-bold text-gray-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Model Duration (Yrs)</label>
+                                    <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-bold text-gray-600">
+                                </div>
+                                <div class="col-span-2 pt-2 border-t border-gray-200/50">
+                                    <label class="block text-[9px] font-black text-emerald-700 mb-1 uppercase tracking-widest text-center">Utility Rate Escalation (%)</label>
+                                    <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="p-3 bg-emerald-50/50 rounded-lg border border-emerald-100 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs font-bold text-emerald-800 uppercase">Solar</span>
-                                <span id="ppwLabel" class="text-xs font-mono font-bold text-emerald-600">$0.00/W</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="number" id="solarCost" value="25000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Cost $">
-                                <input type="number" id="solarSize" value="10" step="0.1" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Size kW">
-                            </div>
-                            <div class="spectrum-bar"><div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
-                        </div>
-
-                        <div class="p-3 bg-blue-50/30 rounded-lg border border-blue-100 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center space-x-2">
-                                    <input type="checkbox" id="hasBattery" checked onchange="calculate()" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                                    <label for="hasBattery" class="text-xs font-bold text-blue-800 uppercase">Battery</label>
-                                </div>
-                                <span id="bpkwhLabel" class="text-xs font-mono font-bold text-blue-600">$0/kWh</span>
-                            </div>
-                            <div id="batteryInputs" class="grid grid-cols-2 gap-3">
-                                <input type="number" id="batteryCost" value="10000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Cost $">
-                                <input type="number" id="batterySize" value="13.5" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="kWh">
-                            </div>
-                            <div class="spectrum-bar"><div id="batteryPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Est. Year 1 Production (kWh)</label>
-                            <input type="number" id="manualProduction" value="12000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-sm">
-                        </div>
-                    </div>
-
-                    <!-- Sidebar Summaries -->
-                    <div class="mt-6 pt-6 border-t border-gray-100 space-y-4">
-                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                            <h3 class="font-bold text-emerald-800 text-[10px] uppercase tracking-widest mb-3">Incentive Summary</h3>
-                            <div class="space-y-2 text-xs">
-                                <div class="flex justify-between text-gray-600"><span>Solar DG Rebate</span><span id="dgRebateVal" class="font-mono font-bold">$0</span></div>
-                                <div class="flex justify-between text-gray-600"><span>Battery Rebate</span><span id="batteryRebateVal" class="font-mono font-bold">$0</span></div>
-                                <div class="flex justify-between border-t border-emerald-200 pt-2 text-emerald-900 font-bold"><span>Total Cash Back</span><span id="totalRebateVal" class="font-mono">$0</span></div>
-                                <div class="flex justify-between pt-1 text-gray-600"><span>Total SREC (15yr)</span><span id="srecVal" class="font-mono font-bold">$0</span></div>
-                                <div id="arbitrageRow" class="flex justify-between pt-1 hidden text-blue-700"><span>Arb. Savings (Yr 1)</span><span id="arbitrageVal" class="font-mono font-bold">$0</span></div>
-                            </div>
-                        </div>
-
-                        <button onclick="toggleAdvanced()" class="w-full text-center text-[10px] font-bold text-gray-400 hover:text-emerald-600 uppercase tracking-widest flex items-center justify-center">
-                            Advanced Settings 
-                            <svg id="advancedArrow" class="w-3 h-3 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-
-                        <div id="advancedInputs" class="hidden space-y-4 pt-4">
+                        <!-- Active System -->
+                        <div class="space-y-6">
+                            <h3 class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Active System Specs</h3>
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-tight">Self-Consumption %</label>
-                                <input type="range" id="selfConsumption" min="40" max="100" value="85" oninput="document.getElementById('selfConsumptionVal').innerText = this.value + '%'; calculate()" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                                <span id="selfConsumptionVal" class="text-[10px] font-mono text-gray-400">85%</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Eff. Loss %</label>
-                                    <input type="number" id="efficiencyLoss" value="15" oninput="updateProduction(); calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Solar Degr %</label>
-                                    <input type="number" id="solarDegradation" value="0.5" step="0.1" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Utility Infl %</label>
-                                    <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Batt Degr %</label>
-                                    <input type="number" id="battDegradation" value="2.5" step="0.1" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                <div class="flex space-x-2">
+                                    <input type="text" id="systemName" oninput="calculate()" class="flex-1 rounded-xl border-gray-200 p-3 text-xs font-black text-emerald-800 bg-emerald-50/30 focus:bg-white transition-all" placeholder="Enter System Name">
+                                    <button onclick="deleteSystem()" id="deleteBtn" class="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="checkbox" id="enableReplace" onchange="calculate()" class="h-3 w-3 text-emerald-600 border-gray-300 rounded">
-                                <label for="enableReplace" class="text-[10px] font-bold text-gray-500 uppercase italic">Battery Replace</label>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="number" id="battReplaceYear" value="12" class="w-full rounded border-gray-200 p-1 text-xs" placeholder="Year">
-                                <input type="number" id="battReplaceCost" value="8000" class="w-full rounded border-gray-200 p-1 text-xs" placeholder="Cost $">
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="checkbox" id="sigAI" onchange="calculate()" class="h-3 w-3 text-emerald-600 border-gray-300 rounded">
-                                <label for="sigAI" class="text-[10px] font-bold text-gray-500 uppercase">Enable Arbitrage</label>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
+
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">SREC Price $</label>
-                                    <input type="number" id="srecPrice" value="0" placeholder="Auto" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                    <label class="block text-[9px] font-black text-gray-400 mb-1 uppercase tracking-widest">Utility</label>
+                                    <select id="utility" onchange="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-xs font-black bg-gray-50">
+                                        <option value="comed">ComEd</option>
+                                        <option value="ameren">Ameren</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">SREC Fee %</label>
-                                    <input type="number" id="srecFee" value="15" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                    <label class="block text-[9px] font-black text-gray-400 mb-1 uppercase tracking-widest">Ownership</label>
+                                    <select id="ownership" onchange="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-xs font-black bg-gray-50">
+                                        <option value="owned">Owned</option>
+                                        <option value="third-party">Lease</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100/50 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[9px] font-black text-emerald-800 uppercase tracking-[0.1em]">Solar Array</span>
+                                    <span id="ppwLabel" class="text-xs font-mono font-black text-emerald-600">$0.00/W</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" id="solarCost" oninput="calculate()" class="w-full rounded-xl border-emerald-200/50 p-2.5 text-xs font-black text-emerald-900" placeholder="Cost $">
+                                    <input type="number" id="solarSize" step="0.1" oninput="updateProduction(); calculate()" class="w-full rounded-xl border-emerald-200/50 p-2.5 text-xs font-black text-emerald-900" placeholder="kW">
+                                </div>
+                                <div class="spectrum-bar"><div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
+                            </div>
+
+                            <div class="p-4 bg-blue-50/30 rounded-2xl border border-blue-100/50 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="hasBattery" checked onchange="calculate()" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        <label for="hasBattery" class="text-[9px] font-black text-blue-800 uppercase tracking-[0.1em]">Battery</label>
+                                    </div>
+                                    <span id="bpkwhLabel" class="text-xs font-mono font-black text-blue-600">$0/kWh</span>
+                                </div>
+                                <div id="batteryInputs" class="grid grid-cols-2 gap-3">
+                                    <input type="number" id="batteryCost" oninput="calculate()" class="w-full rounded-xl border-blue-200/50 p-2.5 text-xs font-black text-blue-900" placeholder="Cost $">
+                                    <input type="number" id="batterySize" step="0.1" oninput="calculate()" class="w-full rounded-xl border-blue-200/50 p-2.5 text-xs font-black text-blue-900" placeholder="kWh">
+                                </div>
+                                <div class="spectrum-bar"><div id="batteryPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-black text-gray-400 mb-1 uppercase tracking-widest text-center">Annual Generation (Year 1)</label>
+                                <input type="number" id="manualProduction" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-3 text-sm font-black text-center text-gray-700 bg-gray-50/50 focus:bg-white transition-all shadow-inner" placeholder="kWh per year">
+                            </div>
+                        </div>
+
+                        <!-- Sidebar Summaries -->
+                        <div class="mt-8 pt-8 border-t border-gray-50 space-y-6">
+                            <div class="bg-gray-900 p-5 rounded-2xl shadow-xl shadow-emerald-900/10">
+                                <h3 class="font-black text-emerald-400 text-[8px] uppercase tracking-[0.3em] mb-4">Cash Back Summary</h3>
+                                <div class="space-y-3 text-[11px] text-gray-400 font-medium">
+                                    <div class="flex justify-between"><span>Solar DG Rebate</span><span id="dgRebateVal" class="text-white font-mono">$0</span></div>
+                                    <div class="flex justify-between"><span>Battery Rebate</span><span id="batteryRebateVal" class="text-white font-mono">$0</span></div>
+                                    <div class="flex justify-between border-t border-gray-800 pt-3 text-emerald-400 font-black"><span>Total Net Rebate</span><span id="totalRebateVal" class="font-mono text-xl leading-none">$0</span></div>
+                                    <div class="flex justify-between pt-1 font-bold text-gray-500"><span>15yr SREC Value</span><span id="srecVal" class="text-gray-300 font-mono">$0</span></div>
+                                    <div id="arbitrageRow" class="flex justify-between pt-1 hidden text-blue-400"><span>Arbitrage (Yr 1)</span><span id="arbitrageVal" class="font-mono">$0</span></div>
+                                </div>
+                            </div>
+
+                            <button onclick="toggleAdvanced()" class="w-full text-[10px] font-black text-gray-400 hover:text-emerald-600 uppercase tracking-[0.2em] flex items-center justify-center transition-all">
+                                Advanced Tuning 
+                                <svg id="advancedArrow" class="w-4 h-4 ml-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+
+                            <div id="advancedInputs" class="hidden space-y-6 pt-4 border-t border-gray-50">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Solar Degr. (%)</label>
+                                        <input type="number" id="solarDegradation" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Batt Degr. (%)</label>
+                                        <input type="number" id="battDegradation" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Eff. Loss (%)</label>
+                                        <input type="number" id="efficiencyLoss" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Arb. Spread ($)</label>
+                                        <input type="number" id="arbitrageSpread" step="0.01" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="enableReplace" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded">
+                                        <label for="enableReplace" class="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">Battery Lifecycle</label>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div><label class="text-[7px] font-black text-gray-400 uppercase">Year (Yr)</label><input type="number" id="battReplaceYear" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                        <div><label class="text-[7px] font-black text-gray-400 uppercase">Cost ($)</label><input type="number" id="battReplaceCost" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Inverter Yr (Yr)</label><input type="number" id="invReplaceYear" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                    <div><label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Inverter ($)</label><input type="number" id="invReplaceCost" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                                    <div><label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">SREC Price ($)</label><input type="number" id="srecPrice" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                    <div><label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">SREC Fee (%)</label><input type="number" id="srecFee" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black"></div>
+                                </div>
+
+                                <div class="flex items-center p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                                    <input type="checkbox" id="sigAI" onchange="calculate()" class="h-5 w-5 text-emerald-600 border-gray-300 rounded">
+                                    <label for="sigAI" class="ml-3 text-[10px] font-black text-emerald-800 uppercase tracking-widest">Enable Arbitrage Logic</label>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Annual Maintenance ($)</label>
+                                    <input type="number" id="annualMaint" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Self-Consumption %</label>
+                                    <input type="range" id="selfConsumption" min="40" max="100" value="85" oninput="document.getElementById('selfConsumptionVal').innerText = this.value + '%'; calculate()" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <span id="selfConsumptionVal" class="text-[10px] font-black text-gray-400 font-mono tracking-widest">85%</span>
                                 </div>
                             </div>
                         </div>
@@ -216,70 +250,81 @@
                 </div>
             </div>
 
-            <!-- Main Panel: Results & Visualization (2/3 of screen) -->
-            <div class="lg:col-span-8 space-y-6">
-                <!-- Dashboard Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Net Cost</p>
-                        <p id="netCost" class="text-lg font-extrabold text-gray-900 leading-tight">$0</p>
+            <!-- Dashboard Main Area -->
+            <div id="dashboardMain" class="flex-1 min-w-0 space-y-8">
+                
+                <!-- Toolbar -->
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6 sticky top-4 z-40 backdrop-blur-md bg-white/90">
+                    <div class="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="systemTabs">
+                        <!-- Populated by JS -->
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Offset</p>
-                        <p id="solarOffset" class="text-lg font-extrabold text-emerald-600 leading-tight">0%</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center border-b-2 border-b-emerald-400">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Payback</p>
-                        <p id="paybackYears" class="text-lg font-extrabold text-emerald-600 leading-tight">0 Yrs</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">LTD Profit</p>
-                        <p id="lifetimeSavings" class="text-lg font-extrabold text-emerald-700 leading-tight">$0</p>
-                    </div>
-                    <div class="bg-emerald-50 p-4 rounded-xl shadow-sm border border-emerald-200 text-center flex flex-col justify-center col-span-2 sm:col-span-1">
-                        <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-1">ROI</p>
-                        <p id="annualizedReturn" class="text-lg font-extrabold text-emerald-700 leading-tight">0%</p>
-                    </div>
-                </div>
 
-                <!-- Primary Visualization -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-gray-800 text-sm uppercase tracking-widest">Cumulative Cash Flow</h3>
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center space-x-1.5">
-                                <input type="checkbox" id="compareMode" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded">
-                                <label for="compareMode" class="text-xs font-bold text-gray-500 uppercase tracking-tighter">Compare Systems</label>
-                            </div>
+                    <div class="flex items-center space-x-6 pl-6 border-l border-gray-100">
+                        <button onclick="addSystem()" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all" title="Add System">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                        <div class="flex items-center">
+                            <label for="compareMode" class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="compareMode" onchange="calculate()" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                <span class="ml-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">Compare</span>
+                            </label>
                         </div>
                     </div>
-                    <div class="h-[350px]"><canvas id="savingsChart"></canvas></div>
                 </div>
 
-                <!-- Multi-System Comparison Table -->
-                <div id="comparisonView" class="hidden bg-white p-6 rounded-xl shadow-sm border border-emerald-200 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-bold text-gray-800 text-xs uppercase tracking-widest">System Comparison</h3>
+                <!-- KPI Summary -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Net Investment</p>
+                        <p id="netCost" class="text-2xl font-black text-gray-900 leading-none">$0</p>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Energy Offset</p>
+                        <p id="solarOffset" class="text-2xl font-black text-emerald-600 leading-none">0%</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-500/20 text-center border-b-8 border-b-emerald-500 transition-all hover:shadow-md">
+                        <p class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.2em] mb-2">Breakeven</p>
+                        <p id="paybackYears" class="text-2xl font-black text-emerald-600 leading-none">0 Yrs</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Total Value</p>
+                        <p id="lifetimeSavings" class="text-2xl font-black text-emerald-700 leading-none">$0</p>
+                    </div>
+                    <div class="bg-emerald-900 p-6 rounded-3xl shadow-2xl shadow-emerald-900/30 border border-emerald-800 text-center col-span-2 sm:col-span-1 transition-all hover:scale-[1.03]">
+                        <p class="text-[10px] font-black text-emerald-300 uppercase tracking-[0.2em] mb-2">Annual ROI</p>
+                        <p id="annualizedReturn" class="text-2xl font-black text-white leading-none">0%</p>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
+                    <h3 class="font-black text-gray-800 text-sm uppercase tracking-[0.3em] mb-10 text-center">ROI Trajectory: Net Cumulative Value</h3>
+                    <div class="h-[500px]"><canvas id="savingsChart"></canvas></div>
+                </div>
+
+                <!-- Comparison Table -->
+                <div id="comparisonView" class="hidden bg-white p-10 rounded-[2.5rem] shadow-sm border-2 border-emerald-500/10 space-y-8">
+                    <h3 class="font-black text-gray-800 text-sm uppercase tracking-[0.3em] text-center">Comparative System Analysis</h3>
+                    <div class="overflow-x-auto no-scrollbar">
                         <table class="w-full text-xs text-left">
-                            <thead><!-- Populated by JS --></thead>
-                            <tbody id="comparisonTableBody" class="divide-y divide-gray-100">
+                            <thead class="border-b-2 border-gray-50"><!-- Populated by JS --></thead>
+                            <tbody id="comparisonTableBody" class="divide-y divide-gray-50">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Secondary Visuals -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-400 mb-4 text-[10px] uppercase tracking-widest text-center">Remaining Battery Capacity</h3>
-                        <div class="h-[180px]"><canvas id="batteryChart"></canvas></div>
+                <!-- Performance Charts -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-24">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Equipment Health: Battery Capacity</h3>
+                        <div class="h-[220px]"><canvas id="batteryChart"></canvas></div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-400 mb-4 text-[10px] uppercase tracking-widest text-center">Annual Solar Production</h3>
-                        <div class="h-[180px]"><canvas id="prodChart"></canvas></div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Annual Generation: Solar Yield</h3>
+                        <div class="h-[220px]"><canvas id="prodChart"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -294,7 +339,6 @@
         const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
         const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode'];
         
-        // Compact mapping for URL sharing
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
             solarCost: 'f', solarSize: 'g', hasBattery: 'h', batteryCost: 'i', batterySize: 'j',
@@ -315,197 +359,23 @@
             arbitrageSpread: 0.08, srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: false
         };
 
-        function saveInputs() {
-            // Save System Level
-            const sysData = {};
-            systemInputIds.forEach(id => { 
-                const el = document.getElementById(id); 
-                if (el) sysData[id] = (el.type === 'checkbox') ? el.checked : el.value; 
-            });
-            systems[activeSystemIndex] = sysData;
-
-            // Save Globals
-            const globalData = {};
-            globalInputIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) globalData[id] = (el.type === 'checkbox') ? el.checked : el.value;
-            });
-
-            const payload = { systems, globals: globalData, activeIndex: activeSystemIndex };
-            localStorage.setItem('solarRoiSystemsV3', JSON.stringify(payload));
-        }
-
-        function loadInputs() {
-            const stored = JSON.parse(localStorage.getItem('solarRoiSystemsV3'));
-            if (stored) {
-                systems = stored.systems || systems;
-                activeSystemIndex = stored.activeIndex || 0;
-                
-                // Load Globals into UI
-                if (stored.globals) {
-                    globalInputIds.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el && stored.globals[id] !== undefined) {
-                            if (el.type === 'checkbox') el.checked = (stored.globals[id] === true || stored.globals[id] === "true");
-                            else el.value = stored.globals[id];
-                        }
-                    });
-                }
-            }
-            loadCurrentSystem();
-        }
-
-        function loadCurrentSystem() {
-            const data = systems[activeSystemIndex];
-            if (!data) return;
-            systemInputIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && data[id] !== undefined) { 
-                    if (el.type === 'checkbox') el.checked = (data[id] === true || data[id] === "true"); 
-                    else el.value = data[id]; 
-                }
-            });
-            const scEl = document.getElementById('selfConsumptionVal');
-            if (scEl) scEl.innerText = (data.selfConsumption || 85) + '%';
-        }
-
-        // Mappings for even shorter URLs
         const valMap = { comed: 0, ameren: 1, owned: 0, 'third-party': 1, true: 1, false: 0 };
-        const revValMap = {
-            utility: { 0: 'comed', 1: 'ameren' },
-            ownership: { 0: 'owned', 1: 'third-party' }
-        };
+        const revValMap = { utility: { 0: 'comed', 1: 'ameren' }, ownership: { 0: 'owned', 1: 'third-party' } };
 
-        function copyShareLink() {
-            saveInputs();
-            
-            const packVal = (id, val) => {
-                if (typeof val === 'boolean') return val ? 1 : 0;
-                if (valMap[val] !== undefined && (id === 'utility' || id === 'ownership')) return valMap[val];
-                if (!isNaN(val) && val !== "" && typeof val !== 'object') return Math.round(parseFloat(val) * 100) / 100;
-                return val;
-            };
-
-            // 1. Pack Globals (only if non-default)
-            const globals = {};
-            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false };
-            globalInputIds.forEach(id => {
-                const el = document.getElementById(id);
-                let val = el.type === 'checkbox' ? el.checked : el.value;
-                if (val !== defaultGlobals[id]) globals[keyMap[id]] = packVal(id, val);
-            });
-            
-            // 2. Pack Systems (only non-default fields)
-            const sysList = systems.map(s => {
-                const compact = {};
-                for (const [k, v] of Object.entries(s)) { 
-                    if (keyMap[k] && v !== defaultSystem[k]) compact[keyMap[k]] = packVal(k, v); 
-                }
-                return compact;
-            });
-
-            // 3. Compact Payload [systems, globals]
-            const payload = [sysList, globals];
-            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
-            const url = window.location.origin + window.location.pathname + "#s=" + compressed;
-            
-            navigator.clipboard.writeText(url).then(() => {
-                const btn = document.getElementById('shareBtn');
-                const original = btn.innerHTML;
-                btn.innerHTML = '✓ Copied Link';
-                setTimeout(() => btn.innerHTML = original, 2000);
-            });
-        }
-
-        function exportData() {
-            saveInputs();
-            const stored = localStorage.getItem('solarRoiSystemsV3');
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(stored);
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "solar_roi_data.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.readAsText(file, 'UTF-8');
-                reader.onload = readerEvent => {
-                    try {
-                        const content = JSON.parse(readerEvent.target.result);
-                        if (content.systems && content.globals) {
-                            localStorage.setItem('solarRoiSystemsV3', JSON.stringify(content));
-                            loadInputs();
-                            renderTabs();
-                            calculate();
-                        }
-                    } catch (err) { alert("Invalid JSON file"); }
-                }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('settingsSidebar');
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.toggle('collapsed');
+                sidebar.classList.toggle('lg:w-96');
+                sidebar.classList.toggle('lg:w-20');
+            } else {
+                sidebar.classList.toggle('hidden');
             }
-            input.click();
-        }
-
-        function checkUrlHash() {
-            const hash = window.location.hash;
-            if (hash.startsWith("#s=")) {
-                try {
-                    const compressed = hash.substring(3);
-                    const json = LZString.decompressFromEncodedURIComponent(compressed);
-                    const decoded = JSON.parse(json);
-                    
-                    const rawSystems = Array.isArray(decoded) ? decoded[0] : decoded.s;
-                    const rawGlobals = Array.isArray(decoded) ? decoded[1] : decoded.g;
-
-                    const unpackVal = (id, val) => {
-                        if (id === 'utility' || id === 'ownership') return revValMap[id][val];
-                        // Identify if this ID corresponds to a checkbox
-                        const isCheck = ['hasBattery', 'enableReplace', 'sigAI', 'compareMode'].includes(id);
-                        if (isCheck) return val === 1;
-                        return val;
-                    };
-
-                    const expandedSystems = rawSystems.map(s => {
-                        const full = JSON.parse(JSON.stringify(defaultSystem));
-                        for (const [k, v] of Object.entries(s)) { 
-                            const id = revMap[k];
-                            if (id) full[id] = unpackVal(id, v); 
-                        }
-                        return full;
-                    });
-                    
-                    const expandedGlobals = {};
-                    for (const [k, v] of Object.entries(rawGlobals)) { 
-                        const id = revMap[k];
-                        if (id) expandedGlobals[id] = unpackVal(id, v); 
-                    }
-
-                    if (confirm("Load shared configuration? This will replace your current data.")) {
-                        systems = expandedSystems;
-                        activeSystemIndex = 0;
-                        
-                        globalInputIds.forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el && expandedGlobals[id] !== undefined) {
-                                if (el.type === 'checkbox') el.checked = expandedGlobals[id];
-                                else el.value = expandedGlobals[id];
-                            }
-                        });
-
-                        loadCurrentSystem();
-                        saveInputs();
-                        window.location.hash = "";
-                        renderTabs();
-                        calculate();
-                    }
-                } catch (e) { console.error("Failed to parse state from URL", e); }
-            }
+            setTimeout(() => {
+                if (charts.flow) charts.flow.resize();
+                if (charts.health) charts.health.resize();
+                if (charts.prod) charts.prod.resize();
+            }, 305);
         }
 
         function toggleAdvanced() {
@@ -545,14 +415,63 @@
             container.innerHTML = "";
             systems.forEach((s, i) => {
                 const btn = document.createElement('button');
-                btn.className = `px-2 py-1 border-b-2 system-tab ${i === activeSystemIndex ? 'tab-active' : 'border-transparent text-gray-500'}`;
+                btn.className = `px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all system-tab ${i === activeSystemIndex ? 'bg-emerald-50 text-emerald-700 border-emerald-200 tab-active shadow-sm' : 'text-gray-400 hover:text-gray-600 border-transparent hover:bg-gray-50'}`;
                 btn.innerText = s.systemName || ("Sys " + (i + 1));
-                btn.title = s.systemName || ("Sys " + (i + 1));
                 btn.onclick = () => switchSystem(i);
                 container.appendChild(btn);
             });
             const delBtn = document.getElementById('deleteBtn');
             if (delBtn) delBtn.style.display = systems.length > 1 ? 'block' : 'none';
+        }
+
+        function saveInputs() {
+            const sysData = {};
+            systemInputIds.forEach(id => { 
+                const el = document.getElementById(id); 
+                if (el) sysData[id] = (el.type === 'checkbox') ? el.checked : el.value; 
+            });
+            systems[activeSystemIndex] = sysData;
+
+            const globalData = {};
+            globalInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) globalData[id] = (el.type === 'checkbox') ? el.checked : el.value;
+            });
+
+            const payload = { systems, globals: globalData, activeIndex: activeSystemIndex };
+            localStorage.setItem('solarRoiSystemsV3', JSON.stringify(payload));
+        }
+
+        function loadInputs() {
+            const stored = JSON.parse(localStorage.getItem('solarRoiSystemsV3'));
+            if (stored) {
+                systems = stored.systems || systems;
+                activeSystemIndex = stored.activeIndex || 0;
+                if (stored.globals) {
+                    globalInputIds.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && stored.globals[id] !== undefined) {
+                            if (el.type === 'checkbox') el.checked = (stored.globals[id] === true || stored.globals[id] === "true");
+                            else el.value = stored.globals[id];
+                        }
+                    });
+                }
+            }
+            loadCurrentSystem();
+        }
+
+        function loadCurrentSystem() {
+            const data = systems[activeSystemIndex];
+            if (!data) return;
+            systemInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && data[id] !== undefined) { 
+                    if (el.type === 'checkbox') el.checked = (data[id] === true || data[id] === "true"); 
+                    else el.value = data[id]; 
+                }
+            });
+            const scEl = document.getElementById('selfConsumptionVal');
+            if (scEl) scEl.innerText = (data.selfConsumption || 85) + '%';
         }
 
         function updateSpectrum(id, value, min, max) {
@@ -562,27 +481,19 @@
         }
 
         function calculateSystem(data, globals) {
-            const getVal = (id) => {
-                if (data && data[id] !== undefined) return data[id];
-                return defaultSystem[id];
-            };
-
+            const getVal = (id) => (data && data[id] !== undefined) ? data[id] : defaultSystem[id];
             const utility = getVal('utility') || 'comed';
             const ownership = getVal('ownership') || 'owned';
-            
-            // Globals
             const annualUsage = parseFloat(globals.annualUsage) || 0;
             const roofCost = parseFloat(globals.roofCost) || 0;
             const modelYears = parseInt(globals.modelYears) || 25;
             const inflation = parseFloat(globals.inflation) / 100;
-
             const annualProdBase = parseFloat(getVal('manualProduction')) || 0;
             const solarCost = parseFloat(getVal('solarCost')) || 0;
             const batteryCost = parseFloat(getVal('batteryCost')) || 0;
             const solarSize = parseFloat(getVal('solarSize')) || 0;
             const batterySize = parseFloat(getVal('batterySize')) || 0;
             const hasBattery = getVal('hasBattery') === true || getVal('hasBattery') === "true";
-
             const selfConsumptionPct = parseFloat(getVal('selfConsumption') !== undefined ? getVal('selfConsumption') : 85) / 100;
             const solarDegrRate = parseFloat(getVal('solarDegradation') !== undefined ? getVal('solarDegradation') : 0.5) / 100;
             const battDegrRate = parseFloat(getVal('battDegradation') !== undefined ? getVal('battDegradation') : 2.5) / 100;
@@ -596,32 +507,29 @@
             const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
             const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
-
+            
             const srecRates = { comed: 78, ameren: 70 };
             let sPrice = baseSrecInput || srecRates[utility] || 78;
             if (ownership === 'owned') sPrice += 20;
-
             const rates = { comed: { total: 0.171, supply: 0.096 }, ameren: { total: 0.165, supply: 0.088 } };
             const uRates = rates[utility] || rates.comed;
             const currentRate = uRates.total;
             const exportRate = uRates.supply;
-
             const dgRebate = solarSize * 300;
             const batteryRebate = hasBattery ? (batterySize * 300) : 0;
             const totalImmRebate = dgRebate + batteryRebate;
             const totalSrecValue = ((annualProdBase * 15 * sPrice) / 1000) * (1 - (srecFeePct / 100));
             const upfrontSrec = totalSrecValue * 0.5;
             const annualSrecTail = (totalSrecValue * 0.5) / 6;
-
+            
             let flowData = [], healthData = [], prodData = [], srecYearly = [];
             const effectiveBatterySize = hasBattery ? batterySize : 0;
             const effectiveBatteryCost = hasBattery ? batteryCost : 0;
-
             let currentBalance = -(solarCost + effectiveBatteryCost + roofCost - totalImmRebate);
             let currentBattKwh = effectiveBatterySize;
             let paybackYear = null;
             let year1ArbTotal = 0;
-
+            
             for (let yr = 0; yr <= modelYears; yr++) {
                 if (yr === 0) {
                     currentBalance += upfrontSrec;
@@ -632,35 +540,27 @@
                     if (currentBalance >= 0) paybackYear = 0;
                     continue;
                 }
-
                 const yrProd = annualProdBase * Math.pow(1 - solarDegrRate, yr - 1);
                 const yrRate = currentRate * Math.pow(1 + inflation, yr - 1);
                 const yrExportRate = exportRate * Math.pow(1 + inflation, yr - 1);
                 currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
-
                 currentBalance -= annualMaintBase * Math.pow(1 + inflation, yr - 1);
-
                 if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) {
                     currentBalance -= battReplaceCost;
                     currentBattKwh = effectiveBatterySize;
                 }
-
                 if (yr > 0 && yr % invReplaceYear === 0) {
                     currentBalance -= invReplaceCost;
                 }
-
                 const hFactor = effectiveBatterySize > 0 ? (currentBattKwh / effectiveBatterySize) : 0;
                 const usedDirectly = Math.min(yrProd * selfConsumptionPct * hFactor, annualUsage);
                 const exported = yrProd - usedDirectly;
-
                 const energyBillNoSolar = annualUsage * yrRate;
                 const basePlc = 3.0; 
                 const capacityBill = basePlc * 120 * Math.pow(1 + inflation, yr - 1);
                 const fixedFloor = 15 * 12 * Math.pow(1 + inflation, yr - 1);
                 const totalBillNoSolar = energyBillNoSolar + capacityBill + fixedFloor;
-
                 let yrSavings = (usedDirectly * yrRate) + (exported * yrExportRate);
-
                 if (sigAIEnabled && effectiveBatterySize > 0) {
                     const plcSavings = Math.min(basePlc, currentBattKwh / 4.0) * 120 * Math.pow(1 + inflation, yr - 1);
                     const delivRate = yrRate - yrExportRate;
@@ -671,31 +571,23 @@
                     yrSavings += arbSavings;
                     if (yr === 1) year1ArbTotal = arbSavings;
                 }
-
                 yrSavings = Math.min(yrSavings, totalBillNoSolar - fixedFloor);
                 currentBalance += yrSavings;
-
                 let srecIncome = 0;
                 if (yr >= 1 && yr <= 6) srecIncome += annualSrecTail;
-
                 currentBalance += srecIncome;
                 srecYearly.push(Math.round(srecIncome));
-
                 if (paybackYear === null && currentBalance >= 0) paybackYear = yr;
-
                 flowData.push(Math.round(currentBalance));
                 healthData.push(currentBattKwh.toFixed(1));
                 prodData.push(Math.round(yrProd));
             }
-
             return {
                 flowData, healthData, prodData, srecYearly,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
                 solarOffset: Math.round((annualProdBase / annualUsage) * 100),
-                paybackYear,
-                lifetimeSavings: flowData[modelYears],
-                year1ArbTotal,
+                paybackYear, lifetimeSavings: flowData[modelYears], year1ArbTotal,
                 ppw: solarSize > 0 ? (solarCost / (solarSize * 1000)) : 0,
                 bpkwh: effectiveBatterySize > 0 ? (effectiveBatteryCost / effectiveBatterySize) : 0,
                 modelYears, solarSize, batterySize: effectiveBatterySize, hasBattery, sigAI: sigAIEnabled
@@ -705,44 +597,34 @@
         function calculate() {
             saveInputs();
             renderTabs();
-            
-            // Get Current Globals
             const globals = {};
             globalInputIds.forEach(id => {
                 const el = document.getElementById(id);
                 globals[id] = el.type === 'checkbox' ? el.checked : el.value;
             });
-
             const currentData = systems[activeSystemIndex];
             const result = calculateSystem(currentData, globals);
             const compareMode = document.getElementById('compareMode').checked;
-
-            // Update Spectrum Gauges
             updateSpectrum('solarPointer', result.ppw, 1.5, 5.0);
             const ppwEl = document.getElementById('ppwLabel');
             if (ppwEl) ppwEl.innerText = "$" + result.ppw.toFixed(2) + "/W";
-
             updateSpectrum('batteryPointer', result.bpkwh, 400, 1500);
             const bpkwhEl = document.getElementById('bpkwhLabel');
             if (bpkwhEl) bpkwhEl.innerText = "$" + Math.round(result.bpkwh) + "/kWh";
-
-            // Update UI
-            document.getElementById('dgRebateVal').innerText = formatCurrency(result.dgRebate);
-            document.getElementById('batteryRebateVal').innerText = formatCurrency(result.batteryRebate);
-            document.getElementById('totalRebateVal').innerText = formatCurrency(result.totalImmRebate);
-            document.getElementById('srecVal').innerText = formatCurrency(result.totalSrecValue);
-            document.getElementById('netCost').innerText = formatCurrency(result.netCost);
-            document.getElementById('solarOffset').innerText = result.solarOffset + "%";
-            document.getElementById('paybackYears').innerText = result.paybackYear ? result.paybackYear + " Yrs" : (result.modelYears + "+ Yrs");
-            document.getElementById('lifetimeSavings').innerText = formatCurrency(result.lifetimeSavings);
-
+            document.querySelectorAll('#dgRebateVal').forEach(el => el.innerText = formatCurrency(result.dgRebate));
+            document.querySelectorAll('#batteryRebateVal').forEach(el => el.innerText = formatCurrency(result.batteryRebate));
+            document.querySelectorAll('#totalRebateVal').forEach(el => el.innerText = formatCurrency(result.totalImmRebate));
+            document.querySelectorAll('#srecVal').forEach(el => el.innerText = formatCurrency(result.totalSrecValue));
+            document.querySelectorAll('#netCost').forEach(el => el.innerText = formatCurrency(result.netCost));
+            document.querySelectorAll('#solarOffset').forEach(el => el.innerText = result.solarOffset + "%");
+            document.querySelectorAll('#paybackYears').forEach(el => el.innerText = result.paybackYear ? result.paybackYear + " Yrs" : (result.modelYears + "+ Yrs"));
+            document.querySelectorAll('#lifetimeSavings').forEach(el => el.innerText = formatCurrency(result.lifetimeSavings));
             const solarCost = parseFloat(currentData.solarCost) || 0;
             const batteryCost = result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0;
             const roofCost = parseFloat(globals.roofCost) || 0;
             const netInit = solarCost + batteryCost + roofCost - result.totalImmRebate - result.totalSrecValue;
             let annualReturn = netInit > 0 ? (Math.pow((result.lifetimeSavings + netInit) / netInit, 1/result.modelYears) - 1) * 100 : 0;
-            document.getElementById('annualizedReturn').innerText = annualReturn.toFixed(1) + "%";
-
+            document.querySelectorAll('#annualizedReturn').forEach(el => el.innerText = annualReturn.toFixed(1) + "%");
             const row = document.getElementById('arbitrageRow');
             if (result.sigAI && result.hasBattery) {
                 row.classList.remove('hidden');
@@ -750,21 +632,16 @@
             } else {
                 row.classList.add('hidden');
             }
-
-            // Handle Comparison Table
             const compView = document.getElementById('comparisonView');
             if (compareMode) {
                 compView.classList.remove('hidden');
                 const compTable = document.querySelector('#comparisonView table');
-                
-                // Update Headers
-                let headerRow = `<tr class="border-b"><th class="py-2 text-[8px] uppercase text-gray-400">Metric</th>`;
+                let headerRow = `<tr class="border-b-2 border-gray-50"><th class="py-4 text-[10px] uppercase text-gray-400 tracking-widest font-black">Metric</th>`;
                 systems.forEach(s => {
-                    headerRow += `<th class="py-2 text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-[80px]" title="${s.systemName}">${s.systemName || "Unnamed"}</th>`;
+                    headerRow += `<th class="py-4 text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px] font-black text-emerald-700" title="${s.systemName}">${s.systemName || "Unnamed"}</th>`;
                 });
                 headerRow += "</tr>";
                 compTable.querySelector('thead').innerHTML = headerRow;
-
                 const tbody = document.getElementById('comparisonTableBody');
                 tbody.innerHTML = "";
                 const metrics = [
@@ -772,19 +649,17 @@
                     { label: "Battery", key: "batterySize", suffix: " kWh" },
                     { label: "Net Cost", key: "netCost", isCurrency: true },
                     { label: "Payback", key: "paybackYear", suffix: " Yrs" },
-                    { label: "Total Profit", key: "lifetimeSavings", isCurrency: true }
+                    { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true }
                 ];
-
                 const allResults = systems.map(s => calculateSystem(s, globals));
-
                 metrics.forEach(m => {
-                    let row = `<tr class="border-b"><td class="py-2 font-bold">${m.label}</td>`;
+                    let row = `<tr class="group hover:bg-gray-50 transition-all"><td class="py-4 font-bold text-gray-400 uppercase text-[9px] tracking-wider">${m.label}</td>`;
                     allResults.forEach(r => {
                         let val = r[m.key];
                         if (m.isCurrency) val = formatCurrency(val);
                         else if (val === null) val = "N/A";
                         else val = val + (m.suffix || "");
-                        row += `<td class="py-2 text-center">${val}</td>`;
+                        row += `<td class="py-4 text-center font-black text-gray-900">${val}</td>`;
                     });
                     row += "</tr>";
                     tbody.innerHTML += row;
@@ -792,180 +667,126 @@
             } else {
                 compView.classList.add('hidden');
             }
-
             const labels = Array.from({length: result.modelYears + 1}, (_, i) => "Yr " + i);
             let compareResults = compareMode ? systems.map(s => calculateSystem(s, globals)) : [result];
             updateCharts(labels, compareResults, result.batterySize, result.paybackYear);
         }
 
         function updateCharts(labels, allResults, batterySize, paybackYear) {
-            const ctxF = document.getElementById('savingsChart').getContext('2d'), 
-                  ctxH = document.getElementById('batteryChart').getContext('2d'),
-                  ctxP = document.getElementById('prodChart').getContext('2d');
-
-            if (charts.flow) charts.flow.destroy(); 
-            if (charts.health) charts.health.destroy();
-            if (charts.prod) charts.prod.destroy();
-
+            const ctxF = document.getElementById('savingsChart').getContext('2d'), ctxH = document.getElementById('batteryChart').getContext('2d'), ctxP = document.getElementById('prodChart').getContext('2d');
+            if (charts.flow) charts.flow.destroy(); if (charts.health) charts.health.destroy(); if (charts.prod) charts.prod.destroy();
             const compareMode = document.getElementById('compareMode').checked;
             const mainResult = compareMode ? allResults[activeSystemIndex] : allResults[0];
-            
-            // Breakeven Line Plugin
             const breakevenLinePlugin = { 
                 id: 'breakevenLine', 
                 afterDraw: (chart) => { 
                     if (paybackYear !== null && paybackYear >= 0) { 
                         const {ctx, chartArea, scales: {x}} = chart; 
                         const xPos = x.getPixelForValue(labels[paybackYear]); 
-                        ctx.save(); 
-                        ctx.beginPath(); 
-                        ctx.setLineDash([5, 5]); 
-                        ctx.moveTo(xPos, chartArea.top); 
-                        ctx.lineTo(xPos, chartArea.bottom); 
-                        ctx.lineWidth = 2; 
-                        ctx.strokeStyle = '#059669'; 
-                        ctx.stroke(); 
-                        
-                        // Add label
-                        ctx.fillStyle = '#059669';
-                        ctx.font = 'bold 10px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('Breakeven', xPos, chartArea.top - 5);
-                        ctx.restore(); 
+                        ctx.save(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.moveTo(xPos, chartArea.top); ctx.lineTo(xPos, chartArea.bottom); ctx.lineWidth = 2; ctx.strokeStyle = '#059669'; ctx.stroke(); 
+                        ctx.fillStyle = '#059669'; ctx.font = 'black 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BREAKEVEN', xPos, chartArea.top - 15); ctx.restore(); 
                     } 
                 } 
             };
-
             const datasets = [];
-
-            // Add SREC Bars only in single view
             if (!compareMode && mainResult) {
-                datasets.push({
-                    type: 'bar',
-                    label: 'SREC Payment',
-                    data: mainResult.srecYearly,
-                    backgroundColor: 'rgba(251, 191, 36, 0.5)',
-                    yAxisID: 'ySrec'
-                });
+                datasets.push({ type: 'bar', label: 'SREC Payments', data: mainResult.srecYearly, backgroundColor: 'rgba(251, 191, 36, 0.4)', yAxisID: 'ySrec', barThickness: 20 });
             }
-
             const palette = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
-            
             allResults.forEach((r, i) => {
                 const sysName = systems[compareMode ? i : activeSystemIndex].systemName || ("Sys " + (i+1));
-                
                 let borderColor = palette[i % palette.length];
                 let backgroundColor = 'transparent';
-                
-                // If not comparing, we can use the segment/gradient feature for the main line
                 let segment = {};
                 if (!compareMode) {
-                    segment = {
-                        borderColor: ctx => ctx.p0.parsed.y < 0 ? '#ef4444' : '#10b981'
-                    };
+                    segment = { borderColor: ctx => ctx.p0.parsed.y < 0 ? '#ef4444' : '#10b981' };
                     backgroundColor = (context) => {
-                        const chart = context.chart;
-                        const {ctx, chartArea} = chart;
-                        if (!chartArea) return null;
-                        const zeroY = chart.scales.y.getPixelForValue(0);
-                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        const stop = (zeroY - chartArea.top) / (chartArea.bottom - chartArea.top);
-                        if (stop > 0 && stop < 1) {
-                            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)'); // Green
-                            gradient.addColorStop(stop, 'rgba(16, 185, 129, 0.2)');
-                            gradient.addColorStop(stop, 'rgba(239, 68, 68, 0.2)'); // Red
-                            gradient.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
-                        } else if (stop <= 0) {
-                            gradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
-                            gradient.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
-                        } else {
-                            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-                            gradient.addColorStop(1, 'rgba(16, 185, 129, 0.2)');
-                        }
+                        const chart = context.chart; const {ctx, chartArea} = chart; if (!chartArea) return null;
+                        const zeroY = chart.scales.y.getPixelForValue(0); const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom); const stop = (zeroY - chartArea.top) / (chartArea.bottom - chartArea.top);
+                        if (stop > 0 && stop < 1) { gradient.addColorStop(0, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(stop, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(stop, 'rgba(239, 68, 68, 0.1)'); gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)'); }
+                        else if (stop <= 0) { gradient.addColorStop(0, 'rgba(239, 68, 68, 0.1)'); gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)'); }
+                        else { gradient.addColorStop(0, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.1)'); }
                         return gradient;
                     };
                 } else {
                     backgroundColor = (allResults.length === 1 || i === activeSystemIndex) ? `${palette[i % palette.length]}1A` : 'transparent';
                 }
-
-                datasets.push({
-                    type: 'line',
-                    label: sysName,
-                    data: r.flowData,
-                    borderColor: borderColor,
-                    backgroundColor: backgroundColor,
-                    fill: (!compareMode || i === activeSystemIndex),
-                    tension: 0.3,
-                    pointRadius: allResults.length > 5 ? 0 : 2,
-                    segment: segment
-                });
+                datasets.push({ type: 'line', label: sysName, data: r.flowData, borderColor: borderColor, borderWidth: 4, backgroundColor: backgroundColor, fill: (!compareMode || i === activeSystemIndex), tension: 0.3, pointRadius: allResults.length > 5 ? 0 : 4, segment: segment });
             });
-
             charts.flow = new Chart(ctxF, { 
-                data: { labels, datasets }, 
-                plugins: [breakevenLinePlugin],
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    layout: {
-                        padding: { top: 20 }
-                    },
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-                        tooltip: { mode: 'index', intersect: false }
-                    }, 
-                    scales: { 
-                        y: { 
-                            ticks: { callback: (v) => '$' + v.toLocaleString(), font: { size: 8 } },
-                            grid: {
-                                color: (context) => context.tick.value === 0 ? '#374151' : 'rgba(0,0,0,0.1)',
-                                lineWidth: (context) => context.tick.value === 0 ? 2 : 1
-                            }
-                        },
-                        ySrec: { position: 'right', display: false, min: 0 },
-                        x: { grid: { display: false }, ticks: { font: { size: 8 } } } 
-                    } 
-                } 
+                data: { labels, datasets }, plugins: [breakevenLinePlugin],
+                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } }, tooltip: { mode: 'index', intersect: false } }, 
+                scales: { y: { ticks: { callback: (v) => '$' + v.toLocaleString(), font: { size: 10 } }, grid: { color: (c) => c.tick.value === 0 ? '#374151' : 'rgba(0,0,0,0.05)', lineWidth: (c) => c.tick.value === 0 ? 3 : 1 } }, ySrec: { position: 'right', display: false, min: 0 }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
             });
-
             if (mainResult) {
-                charts.health = new Chart(ctxH, { 
-                    type: 'bar', 
-                    data: { labels, datasets: [{ label: 'Capacity (kWh)', data: mainResult.healthData, backgroundColor: mainResult.healthData.map(h => (mainResult.batterySize > 0 && (h / mainResult.batterySize) > 0.7) ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)') }] }, 
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: Math.ceil(mainResult.batterySize * 1.1) || 10 }, x: { grid: { display: false } } } } 
-                });
-
-                charts.prod = new Chart(ctxP, { 
-                    type: 'bar', 
-                    data: { labels, datasets: [{ label: 'Prod (kWh)', data: mainResult.prodData, backgroundColor: 'rgba(59, 130, 246, 0.6)' }] }, 
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0 }, x: { grid: { display: false } } } } 
-                });
+                charts.health = new Chart(ctxH, { type: 'bar', data: { labels, datasets: [{ label: 'Capacity (kWh)', data: mainResult.healthData, backgroundColor: mainResult.healthData.map(h => (mainResult.batterySize > 0 && (h / mainResult.batterySize) > 0.7) ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)') }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: Math.ceil(mainResult.batterySize * 1.1) || 10, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } } });
+                charts.prod = new Chart(ctxP, { type: 'bar', data: { labels, datasets: [{ label: 'Prod (kWh)', data: mainResult.prodData, backgroundColor: 'rgba(59, 130, 246, 0.6)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } } });
             }
         }
 
         function formatCurrency(v) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v); }
+        function updateProduction() { const kw = parseFloat(document.getElementById('solarSize').value) || 0; const loss = parseFloat(document.getElementById('efficiencyLoss').value) || 0; document.getElementById('manualProduction').value = Math.round(kw * 1200 * (1 - (loss / 100))); }
+        function updateConsumption() { const utility = document.getElementById('utility').value; const bill = parseFloat(document.getElementById('monthlyBill').value) || 0; const rates = { comed: 0.171, ameren: 0.165 }; const currentUtilityRate = (rates[utility] || rates.comed); document.getElementById('annualUsage').value = Math.max(0, Math.round(((bill - 15) * 12) / currentUtilityRate)); saveInputs(); }
 
-        function updateProduction() {
-            const kw = parseFloat(document.getElementById('solarSize').value) || 0;
-            const loss = parseFloat(document.getElementById('efficiencyLoss').value) || 0;
-            document.getElementById('manualProduction').value = Math.round(kw * 1200 * (1 - (loss / 100)));
-        }
-
-        function updateConsumption() {
-            const utility = document.getElementById('utility').value;
-            const bill = parseFloat(document.getElementById('monthlyBill').value) || 0;
-            const rates = { comed: 0.171, ameren: 0.165 };
-            const currentUtilityRate = (rates[utility] || rates.comed).total;
-            document.getElementById('annualUsage').value = Math.max(0, Math.round(((bill - 15) * 12) / currentUtilityRate));
+        function copyShareLink() {
             saveInputs();
+            const globals = {};
+            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false };
+            globalInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                let val = el.type === 'checkbox' ? el.checked : el.value;
+                if (!isNaN(val) && val !== "" && typeof val !== 'boolean') val = Math.round(parseFloat(val) * 100) / 100;
+                if (val !== defaultGlobals[id]) globals[keyMap[id]] = (typeof val === 'boolean') ? (val?1:0) : (valMap[val] !== undefined ? valMap[val] : val);
+            });
+            const sysList = systems.map(s => {
+                const compact = {};
+                for (const [k, v] of Object.entries(s)) { 
+                    let val = (typeof v === 'number') ? Math.round(v * 100) / 100 : v;
+                    if (keyMap[k] && val !== defaultSystem[k]) compact[keyMap[k]] = (typeof val === 'boolean') ? (val?1:0) : (valMap[val] !== undefined ? valMap[val] : val);
+                }
+                return compact;
+            });
+            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify([sysList, globals]));
+            navigator.clipboard.writeText(window.location.origin + window.location.pathname + "#s=" + compressed).then(() => {
+                const btn = document.getElementById('shareBtn'); const orig = btn.innerHTML; btn.innerHTML = '✓ Copied'; setTimeout(() => btn.innerHTML = orig, 2000);
+            });
         }
 
-        window.onload = () => { 
-            checkUrlHash();
-            loadInputs(); 
-            renderTabs();
-            calculate(); 
-        };
+        function checkUrlHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith("#s=")) {
+                try {
+                    const decoded = JSON.parse(LZString.decompressFromEncodedURIComponent(hash.substring(3)));
+                    const rawSystems = Array.isArray(decoded) ? decoded[0] : decoded.s;
+                    const rawGlobals = Array.isArray(decoded) ? decoded[1] : decoded.g;
+                    const unpackVal = (id, val) => {
+                        if (id === 'utility' || id === 'ownership') return revValMap[id][val];
+                        if (['hasBattery', 'enableReplace', 'sigAI', 'compareMode'].includes(id)) return val === 1;
+                        return val;
+                    };
+                    if (confirm("Load shared configuration?")) {
+                        systems = rawSystems.map(s => {
+                            const full = JSON.parse(JSON.stringify(defaultSystem));
+                            for (const [k, v] of Object.entries(s)) { if (revMap[k]) full[revMap[k]] = unpackVal(revMap[k], v); }
+                            return full;
+                        });
+                        globalInputIds.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el && rawGlobals[keyMap[id]] !== undefined) {
+                                let v = unpackVal(id, rawGlobals[keyMap[id]]);
+                                if (el.type === 'checkbox') el.checked = v; else el.value = v;
+                            }
+                        });
+                        activeSystemIndex = 0; loadCurrentSystem(); saveInputs(); window.location.hash = ""; renderTabs(); calculate();
+                    }
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function exportData() { saveInputs(); const stored = localStorage.getItem('solarRoiSystemsV3'); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(stored); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "solar_roi_data.json"); dl.click(); }
+        function importData() { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { const reader = new FileReader(); reader.readAsText(e.target.files[0], 'UTF-8'); reader.onload = ev => { try { const content = JSON.parse(ev.target.result); if (content.systems) { localStorage.setItem('solarRoiSystemsV3', JSON.stringify(content)); loadInputs(); renderTabs(); calculate(); } } catch (err) { alert("Invalid JSON"); } } }; input.click(); }
+
+        window.onload = () => { checkUrlHash(); loadInputs(); renderTabs(); calculate(); };
     </script>
 </body>
 </html>
