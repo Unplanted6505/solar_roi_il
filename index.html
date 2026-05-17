@@ -864,7 +864,7 @@
         async function copyShareLink() {
             saveInputs();
             const globals = {};
-            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false, showBenchmark: true, benchmarkRate: 7.0 };
+            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false, showBenchmark: true, benchmarkRate: 7.0, lifestyle: 'standard' };
             globalInputIds.forEach(id => {
                 const el = document.getElementById(id);
                 let val = el.type === 'checkbox' ? el.checked : el.value;
@@ -912,6 +912,7 @@
                     const unpackVal = (id, val) => {
                         if (id === 'utility' || id === 'ownership') return revValMap[id][val];
                         if (['hasBattery', 'enableReplace', 'sigAI', 'compareMode', 'showBenchmark'].includes(id)) return val === 1;
+                        if (id === 'lifestyle') return revValMap.lifestyle[val];
                         return val;
                     };
                     if (confirm("Load shared configuration?")) {
