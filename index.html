@@ -6,6 +6,7 @@
     <title>Illinois Solar + Battery ROI Calculator (2026)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <style>
         .tooltip { position: relative; display: inline-block; cursor: help; }
         .tooltip .tooltiptext {
@@ -391,21 +392,46 @@
             if (scEl) scEl.innerText = (data.selfConsumption || 85) + '%';
         }
 
+        // Mappings for even shorter URLs
+        const valMap = { comed: 0, ameren: 1, owned: 0, 'third-party': 1, true: 1, false: 0 };
+        const revValMap = {
+            utility: { 0: 'comed', 1: 'ameren' },
+            ownership: { 0: 'owned', 1: 'third-party' }
+        };
+
         function copyShareLink() {
             saveInputs();
-            const globals = {};
-            globalInputIds.forEach(id => globals[keyMap[id]] = document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value);
             
+            const packVal = (id, val) => {
+                if (typeof val === 'boolean') return val ? 1 : 0;
+                if (valMap[val] !== undefined && (id === 'utility' || id === 'ownership')) return valMap[val];
+                if (!isNaN(val) && val !== "" && typeof val !== 'object') return Math.round(parseFloat(val) * 100) / 100;
+                return val;
+            };
+
+            // 1. Pack Globals (only if non-default)
+            const globals = {};
+            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false };
+            globalInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                let val = el.type === 'checkbox' ? el.checked : el.value;
+                if (val !== defaultGlobals[id]) globals[keyMap[id]] = packVal(id, val);
+            });
+            
+            // 2. Pack Systems (only non-default fields)
             const sysList = systems.map(s => {
                 const compact = {};
-                for (const [k, v] of Object.entries(s)) { if (keyMap[k]) compact[keyMap[k]] = v; }
+                for (const [k, v] of Object.entries(s)) { 
+                    if (keyMap[k] && v !== defaultSystem[k]) compact[keyMap[k]] = packVal(k, v); 
+                }
                 return compact;
             });
 
-            const payload = { s: sysList, g: globals };
-            const json = JSON.stringify(payload);
-            const hash = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-            const url = window.location.origin + window.location.pathname + "#state=" + hash;
+            // 3. Compact Payload [systems, globals]
+            const payload = [sysList, globals];
+            const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
+            const url = window.location.origin + window.location.pathname + "#s=" + compressed;
+            
             navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('shareBtn');
                 const original = btn.innerHTML;
@@ -451,26 +477,42 @@
 
         function checkUrlHash() {
             const hash = window.location.hash;
-            if (hash.startsWith("#state=")) {
+            if (hash.startsWith("#s=")) {
                 try {
-                    const encoded = hash.substring(7);
-                    const json = decodeURIComponent(atob(encoded).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    const compressed = hash.substring(3);
+                    const json = LZString.decompressFromEncodedURIComponent(compressed);
                     const decoded = JSON.parse(json);
                     
-                    const expandedSystems = decoded.s.map(s => {
-                        const full = {};
-                        for (const [k, v] of Object.entries(s)) { if (revMap[k]) full[revMap[k]] = v; }
+                    const rawSystems = Array.isArray(decoded) ? decoded[0] : decoded.s;
+                    const rawGlobals = Array.isArray(decoded) ? decoded[1] : decoded.g;
+
+                    const unpackVal = (id, val) => {
+                        if (id === 'utility' || id === 'ownership') return revValMap[id][val];
+                        // Identify if this ID corresponds to a checkbox
+                        const isCheck = ['hasBattery', 'enableReplace', 'sigAI', 'compareMode'].includes(id);
+                        if (isCheck) return val === 1;
+                        return val;
+                    };
+
+                    const expandedSystems = rawSystems.map(s => {
+                        const full = JSON.parse(JSON.stringify(defaultSystem));
+                        for (const [k, v] of Object.entries(s)) { 
+                            const id = revMap[k];
+                            if (id) full[id] = unpackVal(id, v); 
+                        }
                         return full;
                     });
                     
                     const expandedGlobals = {};
-                    for (const [k, v] of Object.entries(decoded.g)) { if (revMap[k]) expandedGlobals[revMap[k]] = v; }
+                    for (const [k, v] of Object.entries(rawGlobals)) { 
+                        const id = revMap[k];
+                        if (id) expandedGlobals[id] = unpackVal(id, v); 
+                    }
 
                     if (confirm("Load shared configuration? This will replace your current data.")) {
                         systems = expandedSystems;
                         activeSystemIndex = 0;
                         
-                        // Apply Globals to UI
                         globalInputIds.forEach(id => {
                             const el = document.getElementById(id);
                             if (el && expandedGlobals[id] !== undefined) {
