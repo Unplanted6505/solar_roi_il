@@ -71,18 +71,25 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between md:justify-end w-full md:w-auto space-x-6 md:pl-6 md:border-l md:border-gray-100">
-                <button onclick="addSystem()" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all" title="Add System">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </button>
-                <div class="flex items-center">
-                    <label for="compareMode" class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="compareMode" onchange="calculate()" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                        <span class="ml-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">Compare</span>
-                    </label>
+                <div class="flex items-center space-x-6 pl-6 border-l border-gray-100">
+                    <button onclick="addSystem()" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all" title="Add System">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </button>
+                    <div class="flex items-center">
+                        <label for="showBenchmark" class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="showBenchmark" checked onchange="calculate()" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            <span class="ml-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">Benchmark</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <label for="compareMode" class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="compareMode" onchange="calculate()" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            <span class="ml-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">Compare</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
         </div>
 
         <div class="flex flex-col lg:flex-row gap-8 items-stretch lg:items-start">
@@ -225,6 +232,10 @@
                                         <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Arb. Spread ($)</label>
                                         <input type="number" id="arbitrageSpread" step="0.01" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
                                     </div>
+                                    <div>
+                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Benchmark % (S&P)</label>
+                                        <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
+                                    </div>
                                 </div>
                                 
                                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
@@ -335,8 +346,8 @@
         let activeSystemIndex = 0;
         let systems = [{ systemName: "System A" }];
         
-        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
-        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode'];
+        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI', 'benchmarkRate'];
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark'];
         
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
@@ -345,7 +356,7 @@
             solarDegradation: 'o', inflation: 'p', battDegradation: 'q', battReplaceYear: 'r',
             battReplaceCost: 's', invReplaceYear: 't', invReplaceCost: 'u', annualMaint: 'v',
             arbitrageSpread: 'w', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
-            roofCost: 'B', compareMode: 'C'
+            roofCost: 'B', compareMode: 'C', benchmarkRate: 'D', showBenchmark: 'E'
         };
         const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
 
@@ -504,6 +515,7 @@
             const annualMaintBase = parseFloat(getVal('annualMaint') || 250);
             const sigAIEnabled = getVal('sigAI') === true || getVal('sigAI') === "true";
             const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
+            const benchmarkRate = (parseFloat(getVal('benchmarkRate')) || 7) / 100;
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
             const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
             
@@ -521,10 +533,11 @@
             const upfrontSrec = totalSrecValue * 0.5;
             const annualSrecTail = (totalSrecValue * 0.5) / 6;
             
-            let flowData = [], healthData = [], prodData = [], srecYearly = [];
+            let flowData = [], healthData = [], prodData = [], srecYearly = [], benchmarkData = [];
             const effectiveBatterySize = hasBattery ? batterySize : 0;
             const effectiveBatteryCost = hasBattery ? batteryCost : 0;
-            let currentBalance = -(solarCost + effectiveBatteryCost + roofCost - totalImmRebate);
+            const upfrontOutlay = solarCost + effectiveBatteryCost + roofCost - totalImmRebate;
+            let currentBalance = -upfrontOutlay;
             let currentBattKwh = effectiveBatterySize;
             let paybackYear = null;
             let year1ArbTotal = 0;
@@ -536,13 +549,13 @@
                     healthData.push(currentBattKwh.toFixed(1));
                     prodData.push(0);
                     srecYearly.push(Math.round(upfrontSrec));
+                    benchmarkData.push(0);
                     if (currentBalance >= 0) paybackYear = 0;
                     continue;
                 }
                 const yrProd = annualProdBase * Math.pow(1 - solarDegrRate, yr - 1);
                 const yrRate = currentRate * Math.pow(1 + inflation, yr - 1);
                 const yrExportRate = exportRate * Math.pow(1 + inflation, yr - 1);
-                currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
                 currentBalance -= annualMaintBase * Math.pow(1 + inflation, yr - 1);
                 if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) {
                     currentBalance -= battReplaceCost;
@@ -580,9 +593,18 @@
                 flowData.push(Math.round(currentBalance));
                 healthData.push(currentBattKwh.toFixed(1));
                 prodData.push(Math.round(yrProd));
+                
+                // Benchmark: What if the initial outlay grew at benchmarkRate?
+                // We compare the PROFIT of the benchmark against the PROFIT of solar.
+                // Solar profit is currentBalance. Benchmark profit is FV - Outlay.
+                const benchmarkProfit = (upfrontOutlay * Math.pow(1 + benchmarkRate, yr)) - upfrontOutlay;
+                benchmarkData.push(Math.round(benchmarkProfit));
+
+                // Apply degradation for NEXT year
+                currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
             }
             return {
-                flowData, healthData, prodData, srecYearly,
+                flowData, healthData, prodData, srecYearly, benchmarkData,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
                 solarOffset: Math.round((annualProdBase / annualUsage) * 100),
@@ -712,6 +734,11 @@
                 }
                 datasets.push({ type: 'line', label: sysName, data: r.flowData, borderColor: borderColor, borderWidth: 4, backgroundColor: backgroundColor, fill: (!compareMode || i === activeSystemIndex), tension: 0.3, pointRadius: allResults.length > 5 ? 0 : 4, segment: segment });
             });
+            const showBenchmark = document.getElementById('showBenchmark').checked;
+            if (showBenchmark && mainResult) {
+                const bRate = (parseFloat(document.getElementById('benchmarkRate').value) || 7);
+                datasets.push({ type: 'line', label: `Benchmark (${bRate}%)`, data: mainResult.benchmarkData, borderColor: '#9ca3af', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0.1 });
+            }
             charts.flow = new Chart(ctxF, { 
                 data: { labels, datasets }, plugins: [breakevenLinePlugin],
                 options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } }, tooltip: { mode: 'index', intersect: false } }, 
@@ -727,7 +754,7 @@
         function updateProduction() { const kw = parseFloat(document.getElementById('solarSize').value) || 0; const loss = parseFloat(document.getElementById('efficiencyLoss').value) || 0; document.getElementById('manualProduction').value = Math.round(kw * 1200 * (1 - (loss / 100))); }
         function updateConsumption() { const utility = document.getElementById('utility').value; const bill = parseFloat(document.getElementById('monthlyBill').value) || 0; const rates = { comed: 0.171, ameren: 0.165 }; const currentUtilityRate = (rates[utility] || rates.comed); document.getElementById('annualUsage').value = Math.max(0, Math.round(((bill - 15) * 12) / currentUtilityRate)); saveInputs(); }
 
-        function copyShareLink() {
+        async function copyShareLink() {
             saveInputs();
             const globals = {};
             const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false };
@@ -746,9 +773,26 @@
                 return compact;
             });
             const compressed = LZString.compressToEncodedURIComponent(JSON.stringify([sysList, globals]));
-            navigator.clipboard.writeText(window.location.origin + window.location.pathname + "#s=" + compressed).then(() => {
-                const btn = document.getElementById('shareBtn'); const orig = btn.innerHTML; btn.innerHTML = '✓ Copied'; setTimeout(() => btn.innerHTML = orig, 2000);
-            });
+            const shareUrl = window.location.origin + window.location.pathname + "#s=" + compressed;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Solar ROI Analysis',
+                        text: 'Check out this solar + battery ROI calculation for Illinois.',
+                        url: shareUrl
+                    });
+                } catch (err) {
+                    console.error("Share failed:", err);
+                }
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    const btn = document.getElementById('shareBtn'); 
+                    const orig = btn.innerHTML; 
+                    btn.innerHTML = '✓ Copied Link'; 
+                    setTimeout(() => btn.innerHTML = orig, 2000);
+                });
+            }
         }
 
         function checkUrlHash() {
