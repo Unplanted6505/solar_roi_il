@@ -60,7 +60,7 @@
             </div>
         </header>
 
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
+        <div class="flex flex-col lg:flex-row gap-8 items-stretch lg:items-start">
             
             <!-- Sidebar -->
             <div id="settingsSidebar" class="w-full lg:w-96 lg:flex-shrink-0 sidebar-transition overflow-hidden relative">
@@ -298,9 +298,9 @@
                 </div>
 
                 <!-- Main Chart -->
-                <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
+                <div class="bg-white p-4 md:p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
                     <h3 class="font-black text-gray-800 text-sm uppercase tracking-[0.3em] mb-10 text-center">ROI Trajectory: Net Cumulative Value</h3>
-                    <div class="h-[500px]"><canvas id="savingsChart"></canvas></div>
+                    <div class="h-[300px] md:h-[500px]"><canvas id="savingsChart"></canvas></div>
                 </div>
 
                 <!-- Comparison Table -->
@@ -318,13 +318,13 @@
 
                 <!-- Performance Charts -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-24">
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Equipment Health: Battery Capacity</h3>
-                        <div class="h-[220px]"><canvas id="batteryChart"></canvas></div>
+                        <div class="h-[200px] md:h-[220px]"><canvas id="batteryChart"></canvas></div>
                     </div>
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Annual Generation: Solar Yield</h3>
-                        <div class="h-[220px]"><canvas id="prodChart"></canvas></div>
+                        <div class="h-[200px] md:h-[220px]"><canvas id="prodChart"></canvas></div>
                     </div>
                 </div>
             </div>
