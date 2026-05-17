@@ -127,6 +127,15 @@
                                     <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Model Duration (Yrs)</label>
                                     <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-bold text-gray-600">
                                 </div>
+                                <div class="col-span-2">
+                                    <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Lifestyle Profile</label>
+                                    <select id="lifestyle" onchange="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-xs font-black bg-gray-50/50 focus:bg-white transition-all">
+                                        <option value="evening">Evening Peak (Away 9-5)</option>
+                                        <option value="standard" selected>Standard (Balanced)</option>
+                                        <option value="wfh">Work From Home (Daytime Use)</option>
+                                        <option value="heavy">Heavy Day Use / EV Charging</option>
+                                    </select>
+                                </div>
                                 <div class="col-span-2 grid grid-cols-2 gap-4 pt-2 border-t border-gray-200/50">
                                     <div>
                                         <label class="block text-[9px] font-black text-emerald-700 mb-1 uppercase tracking-widest text-center">Rate Escalation (%)</label>
@@ -215,6 +224,17 @@
                                 </div>
                             </div>
 
+                            <div class="p-4 bg-emerald-900/5 rounded-2xl border border-emerald-900/10">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] font-black text-emerald-900 uppercase tracking-widest">Self-Consumption Est.</span>
+                                    <span id="selfConsumptionDisp" class="text-xs font-black text-emerald-700">85%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div id="selfConsumptionBar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 85%"></div>
+                                </div>
+                                <p class="text-[7px] text-gray-400 mt-2 leading-tight uppercase font-bold tracking-tighter italic text-center">Calculated based on hardware balance and lifestyle habits.</p>
+                            </div>
+
                             <button onclick="toggleAdvanced()" class="w-full text-[10px] font-black text-gray-400 hover:text-emerald-600 uppercase tracking-[0.2em] flex items-center justify-center transition-all">
                                 Advanced Tuning 
                                 <svg id="advancedArrow" class="w-4 h-4 ml-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -269,12 +289,6 @@
                                 <div>
                                     <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Annual Maintenance ($)</label>
                                     <input type="number" id="annualMaint" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
-                                </div>
-
-                                <div>
-                                    <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Self-Consumption %</label>
-                                    <input type="range" id="selfConsumption" min="40" max="100" value="85" oninput="document.getElementById('selfConsumptionVal').innerText = this.value + '%'; calculate()" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                                    <span id="selfConsumptionVal" class="text-[10px] font-black text-gray-400 font-mono tracking-widest">85%</span>
                                 </div>
                             </div>
                         </div>
@@ -348,8 +362,8 @@
         let activeSystemIndex = 0;
         let systems = [{ systemName: "System A" }];
         
-        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
-        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate'];
+        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate', 'lifestyle'];
         
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
@@ -358,7 +372,7 @@
             solarDegradation: 'o', inflation: 'p', battDegradation: 'q', battReplaceYear: 'r',
             battReplaceCost: 's', invReplaceYear: 't', invReplaceCost: 'u', annualMaint: 'v',
             arbitrageSpread: 'w', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
-            roofCost: 'B', compareMode: 'C', benchmarkRate: 'D', showBenchmark: 'E'
+            roofCost: 'B', compareMode: 'C', benchmarkRate: 'D', showBenchmark: 'E', lifestyle: 'F'
         };
         const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
 
@@ -371,8 +385,8 @@
             arbitrageSpread: 0.08, srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: false
         };
 
-        const valMap = { comed: 0, ameren: 1, owned: 0, 'third-party': 1, true: 1, false: 0 };
-        const revValMap = { utility: { 0: 'comed', 1: 'ameren' }, ownership: { 0: 'owned', 1: 'third-party' } };
+        const valMap = { comed: 0, ameren: 1, owned: 0, 'third-party': 1, true: 1, false: 0, evening: 0, standard: 1, wfh: 2, heavy: 3 };
+        const revValMap = { utility: { 0: 'comed', 1: 'ameren' }, ownership: { 0: 'owned', 1: 'third-party' }, lifestyle: { 0: 'evening', 1: 'standard', 2: 'wfh', 3: 'heavy' } };
 
         function toggleSidebar() {
             const sidebar = document.getElementById('settingsSidebar');
@@ -506,7 +520,6 @@
             const solarSize = parseFloat(getVal('solarSize')) || 0;
             const batterySize = parseFloat(getVal('batterySize')) || 0;
             const hasBattery = getVal('hasBattery') === true || getVal('hasBattery') === "true";
-            const selfConsumptionPct = parseFloat(getVal('selfConsumption') !== undefined ? getVal('selfConsumption') : 85) / 100;
             const solarDegrRate = parseFloat(getVal('solarDegradation') !== undefined ? getVal('solarDegradation') : 0.5) / 100;
             const battDegrRate = parseFloat(getVal('battDegradation') !== undefined ? getVal('battDegradation') : 2.5) / 100;
             const enableReplace = getVal('enableReplace') === true || getVal('enableReplace') === "true";
@@ -518,6 +531,7 @@
             const sigAIEnabled = getVal('sigAI') === true || getVal('sigAI') === "true";
             const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
             const benchmarkRate = (parseFloat(globals.benchmarkRate) || 7) / 100;
+            const lifestyle = getVal('lifestyle') || 'standard';
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
             const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
             
@@ -543,7 +557,15 @@
             let currentBattKwh = effectiveBatterySize;
             let paybackYear = null;
             let year1ArbTotal = 0;
+            let yr1SelfConsumptionPct = 0;
             
+            const lifestyleBases = { evening: 0.15, standard: 0.25, wfh: 0.35, heavy: 0.45 };
+            const directUseRate = globals.lifestyle ? (lifestyleBases[globals.lifestyle] || 0.25) : 0.25;
+
+            // Monthly weights for Illinois (Production and Load)
+            const solarWeights = [0.45, 0.65, 0.90, 1.15, 1.35, 1.50, 1.50, 1.35, 1.10, 0.85, 0.55, 0.40];
+            const loadWeights = [0.85, 0.80, 0.85, 0.90, 1.00, 1.30, 1.45, 1.35, 1.10, 0.90, 0.85, 0.95];
+
             for (let yr = 0; yr <= modelYears; yr++) {
                 if (yr === 0) {
                     currentBalance += upfrontSrec;
@@ -558,7 +580,36 @@
                 const yrProd = annualProdBase * Math.pow(1 - solarDegrRate, yr - 1);
                 const yrRate = currentRate * Math.pow(1 + inflation, yr - 1);
                 const yrExportRate = exportRate * Math.pow(1 + inflation, yr - 1);
+                
+                // Monthly Simulation with Weather Volatility
+                let yrUsedDirectly = 0;
+                for (let m = 0; m < 12; m++) {
+                    const daysInMonth = 30.4;
+                    const monthProd = (yrProd * solarWeights[m]) / 12;
+                    const monthUsage = (annualUsage * loadWeights[m]) / 12;
+                    
+                    const avgDailyProd = monthProd / daysInMonth;
+                    const avgDailyUsage = monthUsage / daysInMonth;
+                    
+                    // Dynamic Volatility: A large battery mitigates weather swings.
+                    // Base volatility of 0.85, improving up to 0.95 with large storage.
+                    const batteryToSolarRatio = avgDailyProd > 0 ? (currentBattKwh / avgDailyProd) : 1;
+                    const volatility = Math.min(0.95, 0.85 + (batteryToSolarRatio * 0.05));
+                    
+                    const dailyDirect = Math.min(avgDailyProd, avgDailyUsage * directUseRate);
+                    const excessSolar = Math.max(0, avgDailyProd - dailyDirect);
+                    
+                    const nightlyLoad = avgDailyUsage - dailyDirect;
+                    const dailyCapture = Math.min(excessSolar, currentBattKwh * 0.9, nightlyLoad / 0.9) * volatility;
+                    
+                    yrUsedDirectly += (dailyDirect + (dailyCapture * 0.9)) * daysInMonth;
+                }
+
+                if (yr === 1) yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedDirectly / yrProd) : 1.0;
+                const usedDirectly = yrUsedDirectly;
+                const exported = Math.max(0, yrProd - usedDirectly);
                 currentBalance -= annualMaintBase * Math.pow(1 + inflation, yr - 1);
+                
                 if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) {
                     currentBalance -= battReplaceCost;
                     currentBattKwh = effectiveBatterySize;
@@ -566,14 +617,13 @@
                 if (yr > 0 && yr % invReplaceYear === 0) {
                     currentBalance -= invReplaceCost;
                 }
-                const hFactor = effectiveBatterySize > 0 ? (currentBattKwh / effectiveBatterySize) : 0;
-                const usedDirectly = Math.min(yrProd * selfConsumptionPct * hFactor, annualUsage);
-                const exported = yrProd - usedDirectly;
+
                 const energyBillNoSolar = annualUsage * yrRate;
                 const basePlc = 3.0; 
                 const capacityBill = basePlc * 120 * Math.pow(1 + inflation, yr - 1);
                 const fixedFloor = 15 * 12 * Math.pow(1 + inflation, yr - 1);
                 const totalBillNoSolar = energyBillNoSolar + capacityBill + fixedFloor;
+                
                 let yrSavings = (usedDirectly * yrRate) + (exported * yrExportRate);
                 if (sigAIEnabled && effectiveBatterySize > 0) {
                     const plcSavings = Math.min(basePlc, currentBattKwh / 4.0) * 120 * Math.pow(1 + inflation, yr - 1);
@@ -596,13 +646,9 @@
                 healthData.push(currentBattKwh.toFixed(1));
                 prodData.push(Math.round(yrProd));
                 
-                // Benchmark: What if the initial outlay grew at benchmarkRate?
-                // We compare the PROFIT of the benchmark against the PROFIT of solar.
-                // Solar profit is currentBalance. Benchmark profit is FV - Outlay.
                 const benchmarkProfit = (upfrontOutlay * Math.pow(1 + benchmarkRate, yr)) - upfrontOutlay;
                 benchmarkData.push(Math.round(benchmarkProfit));
 
-                // Apply degradation for NEXT year
                 currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
             }
             return {
@@ -613,7 +659,8 @@
                 paybackYear, lifetimeSavings: flowData[modelYears], year1ArbTotal,
                 ppw: solarSize > 0 ? (solarCost / (solarSize * 1000)) : 0,
                 bpkwh: effectiveBatterySize > 0 ? (effectiveBatteryCost / effectiveBatterySize) : 0,
-                modelYears, solarSize, batterySize: effectiveBatterySize, hasBattery, sigAI: sigAIEnabled
+                modelYears, solarSize, batterySize: effectiveBatterySize, hasBattery, sigAI: sigAIEnabled,
+                selfConsumptionPct: yr1SelfConsumptionPct * 100
             };
         }
 
@@ -627,6 +674,13 @@
             });
             const currentData = systems[activeSystemIndex];
             const result = calculateSystem(currentData, globals);
+            
+            // Update Self-Consumption Widget
+            const scDisp = document.getElementById('selfConsumptionDisp');
+            const scBar = document.getElementById('selfConsumptionBar');
+            if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
+            if (scBar) scBar.style.width = result.selfConsumptionPct + "%";
+
             const compareMode = document.getElementById('compareMode').checked;
             updateSpectrum('solarPointer', result.ppw, 1.5, 5.0);
             const ppwEl = document.getElementById('ppwLabel');
