@@ -225,7 +225,7 @@
                                 </div>
                                 <div class="spectrum-bar"><div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
                                 <div class="flex justify-between mt-1.5 text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                                    <span>$2.40/W (Excellent)</span>
+                                    <span>$2.60/W (Excellent)</span>
                                     <span>$3.80/W (High)</span>
                                 </div>
                             </div>
@@ -717,10 +717,10 @@
             if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
 
             const compareMode = document.getElementById('compareMode').checked;
-            updateSpectrum('solarPointer', result.ppw, 2.0, 5.0);
+            updateSpectrum('solarPointer', result.ppw, 2.6, 3.8);
             const ppwEl = document.getElementById('ppwLabel');
             if (ppwEl) ppwEl.innerText = "$" + result.ppw.toFixed(2) + "/W";
-            updateSpectrum('batteryPointer', result.bpkwh, 400, 1300);
+            updateSpectrum('batteryPointer', result.bpkwh, 500, 1200);
             const bpkwhEl = document.getElementById('bpkwhLabel');
             if (bpkwhEl) bpkwhEl.innerText = "$" + Math.round(result.bpkwh) + "/kWh";
             document.querySelectorAll('#dgRebateVal').forEach(el => el.innerText = formatCurrency(result.dgRebate));
