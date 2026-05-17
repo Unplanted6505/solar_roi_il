@@ -178,6 +178,10 @@
                                         <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
                                     </div>
                                     <div>
+                                        <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Insurance (%)</label>
+                                        <input type="number" id="insuranceRate" step="0.05" value="0.75" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                    </div>
+                                    <div>
                                         <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Benchmark % (S&P)</label>
                                         <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
                                     </div>
@@ -400,26 +404,31 @@
         let systems = [{ systemName: "System A" }];
         
         const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
-        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate', 'lifestyle'];
-        
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate', 'lifestyle', 'insuranceRate'];
+
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
             solarCost: 'f', solarSize: 'g', hasBattery: 'h', batteryCost: 'i', batterySize: 'j',
             manualProduction: 'k', modelYears: 'l', selfConsumption: 'm', efficiencyLoss: 'n',
             solarDegradation: 'o', inflation: 'p', battDegradation: 'q', battReplaceYear: 'r',
             battReplaceCost: 's', invReplaceYear: 't', invReplaceCost: 'u', annualMaint: 'v',
-            arbitrageSpread: 'w', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
+            insuranceRate: 'G', arbitrageSpread: 'w', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
             roofCost: 'B', compareMode: 'C', benchmarkRate: 'D', showBenchmark: 'E', lifestyle: 'F'
-        };
-        const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
+        };        const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
 
         const defaultSystem = {
             systemName: "New System", utility: "comed", ownership: "owned",
             solarCost: 25000, solarSize: 10, hasBattery: true, batteryCost: 10000, batterySize: 13.5,
             manualProduction: 12000, selfConsumption: 85, efficiencyLoss: 15,
-            solarDegradation: 0.5, battDegradation: 2.5, battReplaceYear: 12,
-            battReplaceCost: 8000, invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250,
-            arbitrageSpread: 0.08, srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: false
+            solarDegradation: 0.5, battDegradation: 2.5, battReplaceYear: 12, battReplaceCost: 8000,
+            invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250, arbitrageSpread: 0.08,
+            srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: true
+        };
+
+        const defaultGlobals = { 
+            monthlyBill: 150, annualUsage: 10500, roofCost: 0, 
+            modelYears: 25, inflation: 3, insuranceRate: 0.75,
+            compareMode: false, showBenchmark: true, benchmarkRate: 7.0, lifestyle: 'standard' 
         };
 
         const valMap = { comed: 0, ameren: 1, owned: 0, 'third-party': 1, true: 1, false: 0, evening: 0, standard: 1, wfh: 2, heavy: 3 };
@@ -508,14 +517,18 @@
         function loadInputs() {
             const stored = JSON.parse(localStorage.getItem('solarRoiSystemsV3'));
             if (stored) {
-                systems = stored.systems || systems;
+                systems = (stored.systems || systems).map(s => {
+                    if (s.insuranceRate !== undefined) delete s.insuranceRate; // Cleanup legacy spec
+                    return s;
+                });
                 activeSystemIndex = stored.activeIndex || 0;
                 if (stored.globals) {
                     globalInputIds.forEach(id => {
                         const el = document.getElementById(id);
-                        if (el && stored.globals[id] !== undefined) {
-                            if (el.type === 'checkbox') el.checked = (stored.globals[id] === true || stored.globals[id] === "true");
-                            else el.value = stored.globals[id];
+                        if (el) {
+                            let val = stored.globals[id] !== undefined ? stored.globals[id] : defaultGlobals[id];
+                            if (el.type === 'checkbox') el.checked = (val === true || val === "true");
+                            else el.value = val;
                         }
                     });
                 }
@@ -565,6 +578,7 @@
             const invReplaceYear = parseInt(getVal('invReplaceYear') || 15);
             const invReplaceCost = parseFloat(getVal('invReplaceCost') || 2500);
             const annualMaintBase = parseFloat(getVal('annualMaint') || 250);
+            const insuranceRate = (parseFloat(globals.insuranceRate) || 0.75) / 100;
             const sigAIEnabled = getVal('sigAI') === true || getVal('sigAI') === "true";
             const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
             const benchmarkRate = (parseFloat(globals.benchmarkRate) || 7) / 100;
@@ -645,7 +659,8 @@
                 if (yr === 1) yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedDirectly / yrProd) : 1.0;
                 const usedDirectly = yrUsedDirectly;
                 const exported = Math.max(0, yrProd - usedDirectly);
-                currentBalance -= annualMaintBase * Math.pow(1 + inflation, yr - 1);
+                const yrInsurance = (solarCost * insuranceRate) * Math.pow(1 + inflation, yr - 1);
+                currentBalance -= (annualMaintBase * Math.pow(1 + inflation, yr - 1)) + yrInsurance;
                 
                 if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) {
                     currentBalance -= battReplaceCost;
@@ -872,7 +887,6 @@
         async function copyShareLink() {
             saveInputs();
             const globals = {};
-            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false, showBenchmark: true, benchmarkRate: 7.0, lifestyle: 'standard' };
             globalInputIds.forEach(id => {
                 const el = document.getElementById(id);
                 let val = el.type === 'checkbox' ? el.checked : el.value;
@@ -931,8 +945,8 @@
                         });
                         globalInputIds.forEach(id => {
                             const el = document.getElementById(id);
-                            if (el && rawGlobals[keyMap[id]] !== undefined) {
-                                let v = unpackVal(id, rawGlobals[keyMap[id]]);
+                            if (el) {
+                                let v = rawGlobals[keyMap[id]] !== undefined ? unpackVal(id, rawGlobals[keyMap[id]]) : defaultGlobals[id];
                                 if (el.type === 'checkbox') el.checked = v; else el.value = v;
                             }
                         });
@@ -957,6 +971,19 @@
                 document.getElementById('moonIcon').classList.remove('hidden');
             } else {
                 document.documentElement.classList.add('dark');
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
+            }
+            
+            renderTabs(); 
+            calculate(); 
+        };
+    </script>
+</body>
+</html>
+
+</html>
+ent.classList.add('dark');
                 document.getElementById('sunIcon').classList.remove('hidden');
                 document.getElementById('moonIcon').classList.add('hidden');
             }
