@@ -224,17 +224,6 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 bg-emerald-900/5 rounded-2xl border border-emerald-900/10">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[9px] font-black text-emerald-900 uppercase tracking-widest">Self-Consumption Est.</span>
-                                    <span id="selfConsumptionDisp" class="text-xs font-black text-emerald-700">85%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                    <div id="selfConsumptionBar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 85%"></div>
-                                </div>
-                                <p class="text-[7px] text-gray-400 mt-2 leading-tight uppercase font-bold tracking-tighter italic text-center">Calculated based on hardware balance and lifestyle habits.</p>
-                            </div>
-
                             <button onclick="toggleAdvanced()" class="w-full text-[10px] font-black text-gray-400 hover:text-emerald-600 uppercase tracking-[0.2em] flex items-center justify-center transition-all">
                                 Advanced Tuning 
                                 <svg id="advancedArrow" class="w-4 h-4 ml-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -300,7 +289,7 @@
             <div id="dashboardMain" class="flex-1 min-w-0 space-y-8">
                 
                 <!-- KPI Summary -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Net Investment</p>
                         <p id="netCost" class="text-2xl font-black text-gray-900 leading-none">$0</p>
@@ -308,6 +297,10 @@
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Energy Offset</p>
                         <p id="solarOffset" class="text-2xl font-black text-emerald-600 leading-none">0%</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Self-Consumption</p>
+                        <p id="selfConsumptionDisp" class="text-2xl font-black text-blue-600 leading-none">0%</p>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-500/20 text-center border-b-8 border-b-emerald-500 transition-all hover:shadow-md">
                         <p class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.2em] mb-2">Breakeven</p>
@@ -677,9 +670,7 @@
             
             // Update Self-Consumption Widget
             const scDisp = document.getElementById('selfConsumptionDisp');
-            const scBar = document.getElementById('selfConsumptionBar');
             if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
-            if (scBar) scBar.style.width = result.selfConsumptionPct + "%";
 
             const compareMode = document.getElementById('compareMode').checked;
             updateSpectrum('solarPointer', result.ppw, 1.5, 5.0);
