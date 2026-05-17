@@ -60,6 +60,31 @@
                             <!-- Populated by JS -->
                         </div>
                     </div>
+
+                    <!-- Global Settings Panel -->
+                    <div class="bg-gray-100 p-4 rounded-xl mb-6 border border-gray-200 space-y-4">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Global Project Settings</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Avg. Monthly Bill ($)</label>
+                                <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Annual Usage (kWh)</label>
+                                <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Roof Work Cost ($)</label>
+                                <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Years to Model</label>
+                                <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="space-y-4">
                         <div>
@@ -85,16 +110,6 @@
                                     <option value="owned">Customer Owned</option>
                                     <option value="third-party">Lease / PPA</option>
                                 </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Avg. Monthly Bill ($)</label>
-                                <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Annual Usage (kWh)</label>
-                                <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
                             </div>
                         </div>
                         
@@ -141,16 +156,6 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Roof Work Cost ($)</label>
-                                <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Years to Model</label>
-                                <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Est. Year 1 Production (kWh)
@@ -307,7 +312,9 @@
         let charts = { flow: null, health: null, prod: null };
         let activeSystemIndex = 0;
         let systems = [{ systemName: "System A" }];
-        const inputIds = ['systemName', 'utility', 'ownership', 'monthlyBill', 'annualUsage', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'modelYears', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'inflation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI', 'roofCost', 'compareMode'];
+        
+        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode'];
         
         // Compact mapping for URL sharing
         const keyMap = {
@@ -322,24 +329,81 @@
         const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
 
         const defaultSystem = {
-            systemName: "New System", utility: "comed", ownership: "owned", monthlyBill: 150, annualUsage: 10500,
+            systemName: "New System", utility: "comed", ownership: "owned",
             solarCost: 25000, solarSize: 10, hasBattery: true, batteryCost: 10000, batterySize: 13.5,
-            manualProduction: 12000, modelYears: 25, selfConsumption: 85, efficiencyLoss: 15,
-            solarDegradation: 0.5, inflation: 3, battDegradation: 2.5, battReplaceYear: 12,
+            manualProduction: 12000, selfConsumption: 85, efficiencyLoss: 15,
+            solarDegradation: 0.5, battDegradation: 2.5, battReplaceYear: 12,
             battReplaceCost: 8000, invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250,
-            arbitrageSpread: 0.08, srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: false,
-            roofCost: 0, compareMode: false
+            arbitrageSpread: 0.08, srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: false
         };
+
+        function saveInputs() {
+            // Save System Level
+            const sysData = {};
+            systemInputIds.forEach(id => { 
+                const el = document.getElementById(id); 
+                if (el) sysData[id] = (el.type === 'checkbox') ? el.checked : el.value; 
+            });
+            systems[activeSystemIndex] = sysData;
+
+            // Save Globals
+            const globalData = {};
+            globalInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) globalData[id] = (el.type === 'checkbox') ? el.checked : el.value;
+            });
+
+            const payload = { systems, globals: globalData, activeIndex: activeSystemIndex };
+            localStorage.setItem('solarRoiSystemsV3', JSON.stringify(payload));
+        }
+
+        function loadInputs() {
+            const stored = JSON.parse(localStorage.getItem('solarRoiSystemsV3'));
+            if (stored) {
+                systems = stored.systems || systems;
+                activeSystemIndex = stored.activeIndex || 0;
+                
+                // Load Globals into UI
+                if (stored.globals) {
+                    globalInputIds.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && stored.globals[id] !== undefined) {
+                            if (el.type === 'checkbox') el.checked = (stored.globals[id] === true || stored.globals[id] === "true");
+                            else el.value = stored.globals[id];
+                        }
+                    });
+                }
+            }
+            loadCurrentSystem();
+        }
+
+        function loadCurrentSystem() {
+            const data = systems[activeSystemIndex];
+            if (!data) return;
+            systemInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && data[id] !== undefined) { 
+                    if (el.type === 'checkbox') el.checked = (data[id] === true || data[id] === "true"); 
+                    else el.value = data[id]; 
+                }
+            });
+            const scEl = document.getElementById('selfConsumptionVal');
+            if (scEl) scEl.innerText = (data.selfConsumption || 85) + '%';
+        }
 
         function copyShareLink() {
             saveInputs();
-            const compressed = systems.map(s => {
+            const globals = {};
+            globalInputIds.forEach(id => globals[keyMap[id]] = document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value);
+            
+            const sysList = systems.map(s => {
                 const compact = {};
                 for (const [k, v] of Object.entries(s)) { if (keyMap[k]) compact[keyMap[k]] = v; }
                 return compact;
             });
-            // Use UTF-8 safe base64 encoding
-            const json = JSON.stringify(compressed);
+
+            const payload = { s: sysList, g: globals };
+            const json = JSON.stringify(payload);
             const hash = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
             const url = window.location.origin + window.location.pathname + "#state=" + hash;
             navigator.clipboard.writeText(url).then(() => {
@@ -352,7 +416,8 @@
 
         function exportData() {
             saveInputs();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(systems, null, 2));
+            const stored = localStorage.getItem('solarRoiSystemsV3');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(stored);
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
             downloadAnchorNode.setAttribute("download", "solar_roi_data.json");
@@ -372,11 +437,9 @@
                 reader.onload = readerEvent => {
                     try {
                         const content = JSON.parse(readerEvent.target.result);
-                        if (Array.isArray(content)) {
-                            systems = content;
-                            activeSystemIndex = 0;
-                            loadCurrentSystem();
-                            localStorage.setItem('solarRoiSystems', JSON.stringify(systems));
+                        if (content.systems && content.globals) {
+                            localStorage.setItem('solarRoiSystemsV3', JSON.stringify(content));
+                            loadInputs();
                             renderTabs();
                             calculate();
                         }
@@ -391,20 +454,34 @@
             if (hash.startsWith("#state=")) {
                 try {
                     const encoded = hash.substring(7);
-                    // Use UTF-8 safe base64 decoding
                     const json = decodeURIComponent(atob(encoded).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
                     const decoded = JSON.parse(json);
-                    const expanded = decoded.map(s => {
+                    
+                    const expandedSystems = decoded.s.map(s => {
                         const full = {};
                         for (const [k, v] of Object.entries(s)) { if (revMap[k]) full[revMap[k]] = v; }
                         return full;
                     });
+                    
+                    const expandedGlobals = {};
+                    for (const [k, v] of Object.entries(decoded.g)) { if (revMap[k]) expandedGlobals[revMap[k]] = v; }
+
                     if (confirm("Load shared configuration? This will replace your current data.")) {
-                        systems = expanded;
+                        systems = expandedSystems;
                         activeSystemIndex = 0;
-                        loadCurrentSystem(); // Populate UI from new data
-                        localStorage.setItem('solarRoiSystems', JSON.stringify(systems)); // Save to storage
-                        window.location.hash = ""; // Clear hash
+                        
+                        // Apply Globals to UI
+                        globalInputIds.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el && expandedGlobals[id] !== undefined) {
+                                if (el.type === 'checkbox') el.checked = expandedGlobals[id];
+                                else el.value = expandedGlobals[id];
+                            }
+                        });
+
+                        loadCurrentSystem();
+                        saveInputs();
+                        window.location.hash = "";
                         renderTabs();
                         calculate();
                     }
@@ -459,64 +536,35 @@
             if (delBtn) delBtn.style.display = systems.length > 1 ? 'block' : 'none';
         }
 
-        function saveInputs() {
-            const data = {};
-            inputIds.forEach(id => { 
-                const el = document.getElementById(id); 
-                if (el) data[id] = (el.type === 'checkbox') ? el.checked : el.value; 
-            });
-            systems[activeSystemIndex] = data;
-            localStorage.setItem('solarRoiSystems', JSON.stringify(systems));
-        }
-
-        function loadInputs() {
-            const stored = JSON.parse(localStorage.getItem('solarRoiSystems'));
-            if (stored && Array.isArray(stored) && stored.length > 0) systems = stored;
-            loadCurrentSystem();
-        }
-
-        function loadCurrentSystem() {
-            const data = systems[activeSystemIndex];
-            if (!data) return;
-            inputIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && data[id] !== undefined) { 
-                    if (el.type === 'checkbox') el.checked = (data[id] === true || data[id] === "true"); 
-                    else el.value = data[id]; 
-                }
-            });
-            const scEl = document.getElementById('selfConsumptionVal');
-            if (scEl) scEl.innerText = (data.selfConsumption || 85) + '%';
-        }
-
         function updateSpectrum(id, value, min, max) {
             const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
             const el = document.getElementById(id);
             if (el) el.style.left = pct + "%";
         }
 
-        function calculateSystem(data) {
+        function calculateSystem(data, globals) {
             const getVal = (id) => {
                 if (data && data[id] !== undefined) return data[id];
-                const el = document.getElementById(id);
-                if (el) return el.type === 'checkbox' ? el.checked : el.value;
                 return defaultSystem[id];
             };
 
             const utility = getVal('utility') || 'comed';
             const ownership = getVal('ownership') || 'owned';
-            const annualUsage = parseFloat(getVal('annualUsage')) || 0;
+            
+            // Globals
+            const annualUsage = parseFloat(globals.annualUsage) || 0;
+            const roofCost = parseFloat(globals.roofCost) || 0;
+            const modelYears = parseInt(globals.modelYears) || 25;
+            const inflation = parseFloat(globals.inflation) / 100;
+
             const annualProdBase = parseFloat(getVal('manualProduction')) || 0;
             const solarCost = parseFloat(getVal('solarCost')) || 0;
             const batteryCost = parseFloat(getVal('batteryCost')) || 0;
-            const roofCost = parseFloat(getVal('roofCost')) || 0;
             const solarSize = parseFloat(getVal('solarSize')) || 0;
             const batterySize = parseFloat(getVal('batterySize')) || 0;
             const hasBattery = getVal('hasBattery') === true || getVal('hasBattery') === "true";
-            const modelYears = parseInt(getVal('modelYears')) || 25;
 
             const selfConsumptionPct = parseFloat(getVal('selfConsumption') !== undefined ? getVal('selfConsumption') : 85) / 100;
-            const inflation = parseFloat(getVal('inflation') !== undefined ? getVal('inflation') : 3) / 100;
             const solarDegrRate = parseFloat(getVal('solarDegradation') !== undefined ? getVal('solarDegradation') : 0.5) / 100;
             const battDegrRate = parseFloat(getVal('battDegradation') !== undefined ? getVal('battDegradation') : 2.5) / 100;
             const enableReplace = getVal('enableReplace') === true || getVal('enableReplace') === "true";
@@ -638,8 +686,16 @@
         function calculate() {
             saveInputs();
             renderTabs();
+            
+            // Get Current Globals
+            const globals = {};
+            globalInputIds.forEach(id => {
+                const el = document.getElementById(id);
+                globals[id] = el.type === 'checkbox' ? el.checked : el.value;
+            });
+
             const currentData = systems[activeSystemIndex];
-            const result = calculateSystem(currentData);
+            const result = calculateSystem(currentData, globals);
             const compareMode = document.getElementById('compareMode').checked;
 
             // Update Spectrum Gauges
@@ -663,7 +719,7 @@
 
             const solarCost = parseFloat(currentData.solarCost) || 0;
             const batteryCost = result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0;
-            const roofCost = parseFloat(currentData.roofCost) || 0;
+            const roofCost = parseFloat(globals.roofCost) || 0;
             const netInit = solarCost + batteryCost + roofCost - result.totalImmRebate - result.totalSrecValue;
             let annualReturn = netInit > 0 ? (Math.pow((result.lifetimeSavings + netInit) / netInit, 1/result.modelYears) - 1) * 100 : 0;
             document.getElementById('annualizedReturn').innerText = annualReturn.toFixed(1) + "%";
@@ -700,7 +756,7 @@
                     { label: "Total Profit", key: "lifetimeSavings", isCurrency: true }
                 ];
 
-                const allResults = systems.map(s => calculateSystem(s));
+                const allResults = systems.map(s => calculateSystem(s, globals));
 
                 metrics.forEach(m => {
                     let row = `<tr class="border-b"><td class="py-2 font-bold">${m.label}</td>`;
@@ -719,7 +775,7 @@
             }
 
             const labels = Array.from({length: result.modelYears + 1}, (_, i) => "Yr " + i);
-            let compareResults = compareMode ? systems.map(s => calculateSystem(s)) : [result];
+            let compareResults = compareMode ? systems.map(s => calculateSystem(s, globals)) : [result];
             updateCharts(labels, compareResults, result.batterySize, result.paybackYear);
         }
 
