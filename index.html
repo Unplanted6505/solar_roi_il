@@ -224,6 +224,10 @@
                                     <input type="number" id="solarSize" step="0.1" oninput="updateProduction(); calculate()" class="w-full rounded-xl border-emerald-200/50 p-2.5 text-xs font-black text-emerald-900" placeholder="kW">
                                 </div>
                                 <div class="spectrum-bar"><div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
+                                <div class="flex justify-between mt-1.5 text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                    <span>$2.40/W (Excellent)</span>
+                                    <span>$3.80/W (High)</span>
+                                </div>
                             </div>
 
                             <div class="p-4 bg-blue-50/30 rounded-2xl border border-blue-100/50 space-y-4">
@@ -239,6 +243,10 @@
                                     <input type="number" id="batterySize" step="0.1" oninput="calculate()" class="w-full rounded-xl border-blue-200/50 p-2.5 text-xs font-black text-blue-900" placeholder="kWh">
                                 </div>
                                 <div class="spectrum-bar"><div id="batteryPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
+                                <div class="flex justify-between mt-1.5 text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                                    <span>$500/kWh (Excellent)</span>
+                                    <span>$1200/kWh (High)</span>
+                                </div>
                             </div>
 
                             <div>
@@ -709,10 +717,10 @@
             if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
 
             const compareMode = document.getElementById('compareMode').checked;
-            updateSpectrum('solarPointer', result.ppw, 1.5, 5.0);
+            updateSpectrum('solarPointer', result.ppw, 2.0, 5.0);
             const ppwEl = document.getElementById('ppwLabel');
             if (ppwEl) ppwEl.innerText = "$" + result.ppw.toFixed(2) + "/W";
-            updateSpectrum('batteryPointer', result.bpkwh, 400, 1500);
+            updateSpectrum('batteryPointer', result.bpkwh, 400, 1300);
             const bpkwhEl = document.getElementById('bpkwhLabel');
             if (bpkwhEl) bpkwhEl.innerText = "$" + Math.round(result.bpkwh) + "/kWh";
             document.querySelectorAll('#dgRebateVal').forEach(el => el.innerText = formatCurrency(result.dgRebate));
