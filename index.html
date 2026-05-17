@@ -338,7 +338,9 @@
                 for (const [k, v] of Object.entries(s)) { if (keyMap[k]) compact[keyMap[k]] = v; }
                 return compact;
             });
-            const hash = btoa(JSON.stringify(compressed));
+            // Use UTF-8 safe base64 encoding
+            const json = JSON.stringify(compressed);
+            const hash = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
             const url = window.location.origin + window.location.pathname + "#state=" + hash;
             navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('shareBtn');
@@ -389,7 +391,9 @@
             if (hash.startsWith("#state=")) {
                 try {
                     const encoded = hash.substring(7);
-                    const decoded = JSON.parse(atob(encoded));
+                    // Use UTF-8 safe base64 decoding
+                    const json = decodeURIComponent(atob(encoded).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    const decoded = JSON.parse(json);
                     const expanded = decoded.map(s => {
                         const full = {};
                         for (const [k, v] of Object.entries(s)) { if (revMap[k]) full[revMap[k]] = v; }
@@ -398,8 +402,11 @@
                     if (confirm("Load shared configuration? This will replace your current data.")) {
                         systems = expanded;
                         activeSystemIndex = 0;
-                        saveInputs();
+                        loadCurrentSystem(); // Populate UI from new data
+                        localStorage.setItem('solarRoiSystems', JSON.stringify(systems)); // Save to storage
                         window.location.hash = ""; // Clear hash
+                        renderTabs();
+                        calculate();
                     }
                 } catch (e) { console.error("Failed to parse state from URL", e); }
             }
