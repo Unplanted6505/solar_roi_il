@@ -375,8 +375,8 @@
                         if (Array.isArray(content)) {
                             systems = content;
                             activeSystemIndex = 0;
-                            saveInputs();
                             loadCurrentSystem();
+                            localStorage.setItem('solarRoiSystems', JSON.stringify(systems));
                             renderTabs();
                             calculate();
                         }
