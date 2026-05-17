@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Illinois Solar + Battery ROI Calculator (2026)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <style>
@@ -33,21 +49,41 @@
             display: flex; flex-direction: column; align-items: center; gap: 2rem; 
             padding-top: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; 
         }
+
+        /* Dark Mode Adjustments */
+        .dark .spectrum-pointer { background: #e2e8f0; }
+        .dark .bg-gray-50 { background-color: #0f172a; }
+        .dark .bg-white { background-color: #1e293b; }
+        .dark .border-gray-100, .dark .border-gray-50, .dark .border-gray-200 { border-color: #334155; }
+        .dark .text-gray-900 { color: #f8fafc; }
+        .dark .text-gray-800 { color: #f1f5f9; }
+        .dark .text-gray-600 { color: #cbd5e1; }
+        .dark .text-gray-500 { color: #94a3b8; }
+        .dark .text-gray-400 { color: #64748b; }
+        .dark input, .dark select { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+        .dark .bg-emerald-50, .dark .bg-emerald-50\/30, .dark .bg-emerald-50\/40, .dark .bg-emerald-50\/50 { background-color: rgba(16, 185, 129, 0.1); }
+        .dark .bg-blue-50\/30 { background-color: rgba(59, 130, 246, 0.1); }
+        .dark .bg-gray-900 { background-color: #020617; }
+        .dark .backdrop-blur-md { background-color: rgba(30, 41, 59, 0.8); }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-900 overflow-x-hidden text-[13px]">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-900 overflow-x-hidden text-[13px] transition-colors duration-300">
 
     <div class="max-w-[1600px] mx-auto px-4 py-6">
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="text-left">
-                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter">Solar ROI Analyst <span class="text-gray-400 font-light">IL 2026</span></h1>
+                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter dark:text-emerald-400">Solar ROI Analyst <span class="text-gray-400 font-light">IL 2026</span></h1>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">June 2026 SREC (50/50) & Arbitrage</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap gap-2">
-                <button id="shareBtn" onclick="copyShareLink()" class="px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 flex items-center">
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="toggleDarkMode()" class="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-yellow-400 rounded-xl hover:bg-gray-50 transition-all mr-2">
+                    <svg id="sunIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 18v1m9-9h1M3 12h1m15.364 6.364l-.707-.707M6.343 6.364l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="moonIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <button id="shareBtn" onclick="copyShareLink()" class="px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 dark:shadow-none flex items-center">
                     <svg class="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     Copy Share Link
                 </button>
@@ -740,25 +776,37 @@
             updateCharts(labels, compareResults, result.batterySize, result.paybackYear);
         }
 
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('solarDarkMode', isDark);
+            document.getElementById('sunIcon').classList.toggle('hidden', !isDark);
+            document.getElementById('moonIcon').classList.toggle('hidden', isDark);
+            if (charts.flow) calculate(); // Redraw charts with new colors
+        }
+
         function updateCharts(labels, allResults, batterySize, paybackYear) {
             const ctxF = document.getElementById('savingsChart').getContext('2d'), ctxH = document.getElementById('batteryChart').getContext('2d'), ctxP = document.getElementById('prodChart').getContext('2d');
             if (charts.flow) charts.flow.destroy(); if (charts.health) charts.health.destroy(); if (charts.prod) charts.prod.destroy();
             const compareMode = document.getElementById('compareMode').checked;
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
             const mainResult = compareMode ? allResults[activeSystemIndex] : allResults[0];
+            
             const breakevenLinePlugin = { 
                 id: 'breakevenLine', 
                 afterDraw: (chart) => { 
                     if (paybackYear !== null && paybackYear >= 0) { 
                         const {ctx, chartArea, scales: {x}} = chart; 
                         const xPos = x.getPixelForValue(labels[paybackYear]); 
-                        ctx.save(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.moveTo(xPos, chartArea.top); ctx.lineTo(xPos, chartArea.bottom); ctx.lineWidth = 2; ctx.strokeStyle = '#059669'; ctx.stroke(); 
-                        ctx.fillStyle = '#059669'; ctx.font = 'black 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BREAKEVEN', xPos, chartArea.top - 15); ctx.restore(); 
+                        ctx.save(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.moveTo(xPos, chartArea.top); ctx.lineTo(xPos, chartArea.bottom); ctx.lineWidth = 2; ctx.strokeStyle = '#10b981'; ctx.stroke(); 
+                        ctx.fillStyle = '#10b981'; ctx.font = 'black 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BREAKEVEN', xPos, chartArea.top - 15); ctx.restore(); 
                     } 
                 } 
             };
             const datasets = [];
             if (!compareMode && mainResult) {
-                datasets.push({ type: 'bar', label: 'SREC Payments', data: mainResult.srecYearly, backgroundColor: 'rgba(251, 191, 36, 0.4)', yAxisID: 'ySrec', barThickness: 20 });
+                datasets.push({ type: 'bar', label: 'SREC Payments', data: mainResult.srecYearly, backgroundColor: isDark ? 'rgba(251, 191, 36, 0.2)' : 'rgba(251, 191, 36, 0.4)', yAxisID: 'ySrec', barThickness: 20 });
             }
             const palette = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
             allResults.forEach((r, i) => {
@@ -771,7 +819,12 @@
                     backgroundColor = (context) => {
                         const chart = context.chart; const {ctx, chartArea} = chart; if (!chartArea) return null;
                         const zeroY = chart.scales.y.getPixelForValue(0); const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom); const stop = (zeroY - chartArea.top) / (chartArea.bottom - chartArea.top);
-                        if (stop > 0 && stop < 1) { gradient.addColorStop(0, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(stop, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(stop, 'rgba(239, 68, 68, 0.1)'); gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)'); }
+                        if (stop > 0 && stop < 1) { 
+                            gradient.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.1)'); 
+                            gradient.addColorStop(stop, isDark ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.1)'); 
+                            gradient.addColorStop(stop, isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.1)'); 
+                            gradient.addColorStop(1, isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.1)'); 
+                        }
                         else if (stop <= 0) { gradient.addColorStop(0, 'rgba(239, 68, 68, 0.1)'); gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)'); }
                         else { gradient.addColorStop(0, 'rgba(16, 185, 129, 0.1)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.1)'); }
                         return gradient;
@@ -784,16 +837,23 @@
             const showBenchmark = document.getElementById('showBenchmark').checked;
             if (showBenchmark && mainResult) {
                 const bRate = (parseFloat(document.getElementById('benchmarkRate').value) || 7);
-                datasets.push({ type: 'line', label: `Benchmark (${bRate}%)`, data: mainResult.benchmarkData, borderColor: '#9ca3af', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0.1 });
+                datasets.push({ type: 'line', label: `Benchmark (${bRate}%)`, data: mainResult.benchmarkData, borderColor: isDark ? '#475569' : '#9ca3af', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0.1 });
             }
             charts.flow = new Chart(ctxF, { 
                 data: { labels, datasets }, plugins: [breakevenLinePlugin],
-                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } }, tooltip: { mode: 'index', intersect: false } }, 
-                scales: { y: { ticks: { callback: (v) => '$' + v.toLocaleString(), font: { size: 10 } }, grid: { color: (c) => c.tick.value === 0 ? '#374151' : 'rgba(0,0,0,0.05)', lineWidth: (c) => c.tick.value === 0 ? 3 : 1 } }, ySrec: { position: 'right', display: false, min: 0 }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35 } }, 
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: textColor, font: { weight: 'bold', size: 10 } } }, tooltip: { mode: 'index', intersect: false } }, 
+                    scales: { 
+                        y: { ticks: { color: textColor, callback: (v) => '$' + v.toLocaleString(), font: { size: 10 } }, grid: { color: (c) => c.tick.value === 0 ? (isDark ? '#475569' : '#374151') : gridColor, lineWidth: (c) => c.tick.value === 0 ? 3 : 1 } }, 
+                        ySrec: { position: 'right', display: false, min: 0 }, 
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } } 
+                    } 
+                }
             });
             if (mainResult) {
-                charts.health = new Chart(ctxH, { type: 'bar', data: { labels, datasets: [{ label: 'Capacity (kWh)', data: mainResult.healthData, backgroundColor: mainResult.healthData.map(h => (mainResult.batterySize > 0 && (h / mainResult.batterySize) > 0.7) ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)') }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: Math.ceil(mainResult.batterySize * 1.1) || 10, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } } });
-                charts.prod = new Chart(ctxP, { type: 'bar', data: { labels, datasets: [{ label: 'Prod (kWh)', data: mainResult.prodData, backgroundColor: 'rgba(59, 130, 246, 0.6)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } } });
+                charts.health = new Chart(ctxH, { type: 'bar', data: { labels, datasets: [{ label: 'Capacity (kWh)', data: mainResult.healthData, backgroundColor: mainResult.healthData.map(h => (mainResult.batterySize > 0 && (h / mainResult.batterySize) > 0.7) ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)') }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: Math.ceil(mainResult.batterySize * 1.1) || 10, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor } }, x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9 } } } } } });
+                charts.prod = new Chart(ctxP, { type: 'bar', data: { labels, datasets: [{ label: 'Prod (kWh)', data: mainResult.prodData, backgroundColor: 'rgba(59, 130, 246, 0.6)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor } }, x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9 } } } } } });
             }
         }
 
@@ -876,7 +936,25 @@
         function exportData() { saveInputs(); const stored = localStorage.getItem('solarRoiSystemsV3'); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(stored); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "solar_roi_data.json"); dl.click(); }
         function importData() { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { const reader = new FileReader(); reader.readAsText(e.target.files[0], 'UTF-8'); reader.onload = ev => { try { const content = JSON.parse(ev.target.result); if (content.systems) { localStorage.setItem('solarRoiSystemsV3', JSON.stringify(content)); loadInputs(); renderTabs(); calculate(); } } catch (err) { alert("Invalid JSON"); } } }; input.click(); }
 
-        window.onload = () => { checkUrlHash(); loadInputs(); renderTabs(); calculate(); };
+        window.onload = () => { 
+            checkUrlHash(); 
+            loadInputs(); 
+            
+            // Initialize Dark Mode (Default to True)
+            const savedDark = localStorage.getItem('solarDarkMode');
+            if (savedDark === 'false') {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('sunIcon').classList.add('hidden');
+                document.getElementById('moonIcon').classList.remove('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
+            }
+            
+            renderTabs(); 
+            calculate(); 
+        };
     </script>
 </body>
 </html>
