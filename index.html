@@ -47,14 +47,15 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-5 space-y-6">
+            <!-- Sidebar: Configuration & Inputs (1/3 of screen) -->
+            <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="mb-4">
                         <div class="flex justify-between items-center mb-2">
-                            <h2 class="text-xl font-bold flex items-center">System Configuration</h2>
+                            <h2 class="text-xl font-bold flex items-center text-gray-800">System Config</h2>
                             <button onclick="addSystem()" class="text-emerald-600 hover:text-emerald-700 text-xs font-bold flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Add System
+                                Add
                             </button>
                         </div>
                         <div class="flex flex-wrap gap-1 text-xs" id="systemTabs">
@@ -62,247 +63,223 @@
                         </div>
                     </div>
 
-                    <!-- Global Settings Panel -->
+                    <!-- Global Settings -->
                     <div class="bg-gray-100 p-4 rounded-xl mb-6 border border-gray-200 space-y-4">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Global Project Settings</h3>
-                        <div class="grid grid-cols-2 gap-4">
+                        <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Global Project Settings</h3>
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Avg. Monthly Bill ($)</label>
-                                <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Monthly Bill</label>
+                                <input type="number" id="monthlyBill" value="150" oninput="updateConsumption(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Annual Usage (kWh)</label>
-                                <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Roof Work Cost ($)</label>
-                                <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Annual Usage</label>
+                                <input type="number" id="annualUsage" value="10500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Years to Model</label>
-                                <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Roof Work $</label>
+                                <input type="number" id="roofCost" value="0" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Model Years</label>
+                                <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm p-2 text-sm">
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Active System Config -->
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">System Name</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">SYSTEM NAME</label>
                             <div class="flex space-x-2">
-                                <input type="text" id="systemName" placeholder="e.g. Premium Quote" oninput="calculate()" class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                                <input type="text" id="systemName" placeholder="e.g. Premium Quote" oninput="calculate()" class="flex-1 rounded-lg border-gray-300 shadow-sm p-2 text-sm font-bold text-emerald-700">
                                 <button onclick="deleteSystem()" id="deleteBtn" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Utility Provider</label>
-                                <select id="utility" onchange="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                    <option value="comed">ComEd (Northern IL)</option>
-                                    <option value="ameren">Ameren (Central/Southern IL)</option>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Utility</label>
+                                <select id="utility" onchange="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs">
+                                    <option value="comed">ComEd</option>
+                                    <option value="ameren">Ameren</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Ownership</label>
-                                <select id="ownership" onchange="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                    <option value="owned">Customer Owned</option>
-                                    <option value="third-party">Lease / PPA</option>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Ownership</label>
+                                <select id="ownership" onchange="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs">
+                                    <option value="owned">Owned</option>
+                                    <option value="third-party">Lease/PPA</option>
                                 </select>
                             </div>
                         </div>
                         
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                        <div class="p-3 bg-emerald-50/50 rounded-lg border border-emerald-100 space-y-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-gray-700">Solar System</span>
+                                <span class="text-xs font-bold text-emerald-800 uppercase">Solar</span>
                                 <span id="ppwLabel" class="text-xs font-mono font-bold text-emerald-600">$0.00/W</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Solar Cost ($)</label>
-                                    <input type="number" id="solarCost" value="25000" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Solar Size (kW)</label>
-                                    <input type="number" id="solarSize" value="10" step="0.1" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" id="solarCost" value="25000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Cost $">
+                                <input type="number" id="solarSize" value="10" step="0.1" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Size kW">
                             </div>
-                            <div class="spectrum-bar">
-                                <div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div>
-                            </div>
+                            <div class="spectrum-bar"><div id="solarPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
                         </div>
 
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                        <div class="p-3 bg-blue-50/30 rounded-lg border border-blue-100 space-y-3">
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center space-x-2">
-                                    <input type="checkbox" id="hasBattery" checked onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                                    <label for="hasBattery" class="text-sm font-bold text-gray-700">Battery System</label>
+                                    <input type="checkbox" id="hasBattery" checked onchange="calculate()" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                    <label for="hasBattery" class="text-xs font-bold text-blue-800 uppercase">Battery</label>
                                 </div>
-                                <span id="bpkwhLabel" class="text-xs font-mono font-bold text-emerald-600">$0/kWh</span>
+                                <span id="bpkwhLabel" class="text-xs font-mono font-bold text-blue-600">$0/kWh</span>
                             </div>
-                            <div id="batteryInputs" class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Battery Cost ($)</label>
-                                    <input type="number" id="batteryCost" value="10000" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Capacity (kWh)</label>
-                                    <input type="number" id="batterySize" value="13.5" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                                </div>
+                            <div id="batteryInputs" class="grid grid-cols-2 gap-3">
+                                <input type="number" id="batteryCost" value="10000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="Cost $">
+                                <input type="number" id="batterySize" value="13.5" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-xs" placeholder="kWh">
                             </div>
-                            <div class="spectrum-bar">
-                                <div id="batteryPointer" class="spectrum-pointer" style="left: 50%;"></div>
-                            </div>
+                            <div class="spectrum-bar"><div id="batteryPointer" class="spectrum-pointer" style="left: 50%;"></div></div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Est. Year 1 Production (kWh)
-                                <span class="tooltip ml-1">ⓘ<span class="tooltiptext">The actual AC electricity the system is expected to produce in year 1.</span></span>
-                            </label>
-                            <input type="number" id="manualProduction" value="12000" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Est. Year 1 Production (kWh)</label>
+                            <input type="number" id="manualProduction" value="12000" oninput="calculate()" class="w-full rounded-lg border-gray-300 p-2 text-sm">
                         </div>
                     </div>
 
-                    <button onclick="toggleAdvanced()" class="mt-6 text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center">
-                        Advanced Settings 
-                        <svg id="advancedArrow" class="w-4 h-4 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+                    <!-- Sidebar Summaries -->
+                    <div class="mt-6 pt-6 border-t border-gray-100 space-y-4">
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                            <h3 class="font-bold text-emerald-800 text-[10px] uppercase tracking-widest mb-3">Incentive Summary</h3>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between text-gray-600"><span>Solar DG Rebate</span><span id="dgRebateVal" class="font-mono font-bold">$0</span></div>
+                                <div class="flex justify-between text-gray-600"><span>Battery Rebate</span><span id="batteryRebateVal" class="font-mono font-bold">$0</span></div>
+                                <div class="flex justify-between border-t border-emerald-200 pt-2 text-emerald-900 font-bold"><span>Total Cash Back</span><span id="totalRebateVal" class="font-mono">$0</span></div>
+                                <div class="flex justify-between pt-1 text-gray-600"><span>Total SREC (15yr)</span><span id="srecVal" class="font-mono font-bold">$0</span></div>
+                                <div id="arbitrageRow" class="flex justify-between pt-1 hidden text-blue-700"><span>Arb. Savings (Yr 1)</span><span id="arbitrageVal" class="font-mono font-bold">$0</span></div>
+                            </div>
+                        </div>
 
-                    <div id="advancedInputs" class="hidden mt-4 space-y-4 pt-4 border-t border-gray-100">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Self-Consumption %</label>
-                            <input type="range" id="selfConsumption" min="40" max="100" value="85" oninput="document.getElementById('selfConsumptionVal').innerText = this.value + '%'; calculate()" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                            <span id="selfConsumptionVal" class="text-xs font-mono text-gray-500">85%</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <button onclick="toggleAdvanced()" class="w-full text-center text-[10px] font-bold text-gray-400 hover:text-emerald-600 uppercase tracking-widest flex items-center justify-center">
+                            Advanced Settings 
+                            <svg id="advancedArrow" class="w-3 h-3 ml-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+
+                        <div id="advancedInputs" class="hidden space-y-4 pt-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Efficiency Loss %</label>
-                                <input type="number" id="efficiencyLoss" value="15" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-tight">Self-Consumption %</label>
+                                <input type="range" id="selfConsumption" min="40" max="100" value="85" oninput="document.getElementById('selfConsumptionVal').innerText = this.value + '%'; calculate()" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="selfConsumptionVal" class="text-[10px] font-mono text-gray-400">85%</span>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Solar Degr. %/yr</label>
-                                <input type="number" id="solarDegradation" value="0.5" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Eff. Loss %</label>
+                                    <input type="number" id="efficiencyLoss" value="15" oninput="updateProduction(); calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Solar Degr %</label>
+                                    <input type="number" id="solarDegradation" value="0.5" step="0.1" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Utility Infl %</label>
+                                    <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">Batt Degr %</label>
+                                    <input type="number" id="battDegradation" value="2.5" step="0.1" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Utility Inflation %</label>
-                                <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="enableReplace" onchange="calculate()" class="h-3 w-3 text-emerald-600 border-gray-300 rounded">
+                                <label for="enableReplace" class="text-[10px] font-bold text-gray-500 uppercase italic">Battery Replace</label>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Battery Degr. %/yr</label>
-                                <input type="number" id="battDegradation" value="2.5" step="0.1" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" id="battReplaceYear" value="12" class="w-full rounded border-gray-200 p-1 text-xs" placeholder="Year">
+                                <input type="number" id="battReplaceCost" value="8000" class="w-full rounded border-gray-200 p-1 text-xs" placeholder="Cost $">
                             </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="enableReplace" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                            <label for="enableReplace" class="block text-sm font-medium text-gray-700 italic text-xs">Enable Battery Replacement</label>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Batt Replace Yr</label>
-                                <input type="number" id="battReplaceYear" value="12" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="sigAI" onchange="calculate()" class="h-3 w-3 text-emerald-600 border-gray-300 rounded">
+                                <label for="sigAI" class="text-[10px] font-bold text-gray-500 uppercase">Enable Arbitrage</label>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Batt Replace $</label>
-                                <input type="number" id="battReplaceCost" value="8000" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Inverter Swap Yr</label>
-                                <input type="number" id="invReplaceYear" value="15" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Inverter Cost $</label>
-                                <input type="number" id="invReplaceCost" value="2500" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Annual Maint $</label>
-                                <input type="number" id="annualMaint" value="250" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Market Spread $</label>
-                                <input type="number" id="arbitrageSpread" value="0.08" step="0.01" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">SREC Price $</label>
-                                <input type="number" id="srecPrice" value="0" placeholder="Auto" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">SREC Fee %</label>
-                                <input type="number" id="srecFee" value="15" oninput="calculate()" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border text-sm">
-                            </div>
-                        </div>
-                        <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="sigAI" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                                <label for="sigAI" class="ml-2 block text-sm font-bold text-emerald-800">Enable Arbitrage</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">SREC Price $</label>
+                                    <input type="number" id="srecPrice" value="0" placeholder="Auto" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-gray-400 mb-1 uppercase">SREC Fee %</label>
+                                    <input type="number" id="srecFee" value="15" oninput="calculate()" class="w-full rounded border-gray-200 p-1 text-xs">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-emerald-800 text-sm uppercase tracking-wider">Incentive Breakdown</h3>
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="compareMode" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                            <label for="compareMode" class="text-[10px] font-bold text-emerald-800 uppercase">Compare All</label>
-                        </div>
+            <!-- Main Panel: Results & Visualization (2/3 of screen) -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Net Cost</p>
+                        <p id="netCost" class="text-lg font-extrabold text-gray-900 leading-tight">$0</p>
                     </div>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between"><span>Solar DG Rebate</span><span id="dgRebateVal" class="font-mono font-bold">$0</span></div>
-                        <div class="flex justify-between"><span>Battery Rebate</span><span id="batteryRebateVal" class="font-mono font-bold">$0</span></div>
-                        <div class="flex justify-between border-t border-emerald-200 pt-2"><span class="font-bold">Total Cash Back</span><span id="totalRebateVal" class="font-mono font-bold">$0</span></div>
-                        <div class="flex justify-between pt-2"><span>Total SREC Value (15yr)</span><span id="srecVal" class="font-mono font-bold">$0</span></div>
-                        <div id="arbitrageRow" class="flex justify-between pt-2 hidden border-t border-emerald-200"><span>Est. Arbitrage Savings (Yr 1)</span><span id="arbitrageVal" class="font-mono font-bold">$0</span></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Offset</p>
+                        <p id="solarOffset" class="text-lg font-extrabold text-emerald-600 leading-tight">0%</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center border-b-2 border-b-emerald-400">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Payback</p>
+                        <p id="paybackYears" class="text-lg font-extrabold text-emerald-600 leading-tight">0 Yrs</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">LTD Profit</p>
+                        <p id="lifetimeSavings" class="text-lg font-extrabold text-emerald-700 leading-tight">$0</p>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl shadow-sm border border-emerald-200 text-center flex flex-col justify-center col-span-2 sm:col-span-1">
+                        <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-1">ROI</p>
+                        <p id="annualizedReturn" class="text-lg font-extrabold text-emerald-700 leading-tight">0%</p>
                     </div>
                 </div>
-                
+
+                <!-- Primary Visualization -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-800 text-sm uppercase tracking-widest">Cumulative Cash Flow</h3>
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-1.5">
+                                <input type="checkbox" id="compareMode" onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded">
+                                <label for="compareMode" class="text-xs font-bold text-gray-500 uppercase tracking-tighter">Compare Systems</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-[350px]"><canvas id="savingsChart"></canvas></div>
+                </div>
+
+                <!-- Multi-System Comparison Table -->
                 <div id="comparisonView" class="hidden bg-white p-6 rounded-xl shadow-sm border border-emerald-200 space-y-4">
-                    <h3 class="font-bold text-gray-800 text-xs uppercase">System Comparison</h3>
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800 text-xs uppercase tracking-widest">System Comparison</h3>
+                    </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-[10px] text-left">
-                            <thead>
-                                <!-- Populated by JS -->
-                            </thead>
-                            <tbody id="comparisonTableBody">
+                        <table class="w-full text-xs text-left">
+                            <thead><!-- Populated by JS --></thead>
+                            <tbody id="comparisonTableBody" class="divide-y divide-gray-100">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
 
-            <div class="lg:col-span-7 space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center"><p class="text-[10px] font-semibold text-gray-500 uppercase">Net Cost</p><p id="netCost" class="text-sm font-bold text-gray-900">$0</p></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center"><p class="text-[10px] font-semibold text-gray-500 uppercase">Offset</p><p id="solarOffset" class="text-sm font-bold text-emerald-600">0%</p></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center"><p class="text-[10px] font-semibold text-gray-500 uppercase">Payback</p><p id="paybackYears" class="text-sm font-bold text-emerald-600">0 Yrs</p></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center"><p class="text-[10px] font-semibold text-gray-500 uppercase">Total Profit</p><p id="lifetimeSavings" class="text-sm font-bold text-emerald-700">$0</p></div>
-                    <div class="bg-emerald-50 p-4 rounded-xl shadow-sm border border-emerald-200 text-center"><p class="text-[10px] font-semibold text-emerald-600 uppercase">ROI</p><p id="annualizedReturn" class="text-sm font-bold text-emerald-700">0%</p></div>
-                </div>
-
-                <div class="space-y-6">
+                <!-- Secondary Visuals -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 mb-4 text-xs uppercase">Cash Flow</h3>
-                        <div class="h-[250px]"><canvas id="savingsChart"></canvas></div>
+                        <h3 class="font-bold text-gray-400 mb-4 text-[10px] uppercase tracking-widest text-center">Remaining Battery Capacity</h3>
+                        <div class="h-[180px]"><canvas id="batteryChart"></canvas></div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 mb-4 text-xs uppercase">Battery Capacity (kWh)</h3>
-                        <div class="h-[200px]"><canvas id="batteryChart"></canvas></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 mb-4 text-xs uppercase">Solar Production (kWh)</h3>
-                        <div class="h-[200px]"><canvas id="prodChart"></canvas></div>
+                        <h3 class="font-bold text-gray-400 mb-4 text-[10px] uppercase tracking-widest text-center">Annual Solar Production</h3>
+                        <div class="h-[180px]"><canvas id="prodChart"></canvas></div>
                     </div>
                 </div>
             </div>
