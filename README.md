@@ -28,11 +28,11 @@ Illinois has transitioned away from 1:1 Net Metering. The calculation engine use
 *   **Exported Energy:** Valued at the **Supply-Only Rate** (~$0.096/kWh for ComEd).
 *   **Simulation Logic:** Monthly load/production weights are used to estimate how much solar is used in real-time vs. sent to the grid.
 
-### 4. Battery Storage & SigAI
-The battery model is optimized for high-efficiency LFP systems (e.g., Sigenergy) and includes:
+### 4. Battery Storage & Intelligent Arbitrage
+The battery model is optimized for high-efficiency LFP systems and includes:
 *   **Round-Trip Efficiency:** Modeled at **81%** (90% charge / 90% discharge factor).
-*   **BESH Arbitrage:** For ComEd customers on Hourly Pricing, the tool models a dynamic arbitrage spread (default $0.08/kWh).
-*   **PLC Reduction:** Calculates savings from lowering the homeowner's Peak Load Contribution (Capacity Charge).
+*   **BESH Arbitrage:** For ComEd customers on Hourly Pricing, the tool models dynamic energy arbitrage (default $0.08/kWh spread).
+*   **Grid Services & PLC Reduction:** Calculates savings from lowering the homeowner's Peak Load Contribution (Capacity Charge) and optimized load shifting.
 *   **Degradation:** Defaulting to a 2.5% annual capacity loss.
 
 ### 5. Operating Costs
