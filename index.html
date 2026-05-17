@@ -127,9 +127,15 @@
                                     <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase">Model Duration (Yrs)</label>
                                     <input type="number" id="modelYears" value="25" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2.5 text-sm font-bold text-gray-600">
                                 </div>
-                                <div class="col-span-2 pt-2 border-t border-gray-200/50">
-                                    <label class="block text-[9px] font-black text-emerald-700 mb-1 uppercase tracking-widest text-center">Utility Rate Escalation (%)</label>
-                                    <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
+                                <div class="col-span-2 grid grid-cols-2 gap-4 pt-2 border-t border-gray-200/50">
+                                    <div>
+                                        <label class="block text-[9px] font-black text-emerald-700 mb-1 uppercase tracking-widest text-center">Rate Escalation (%)</label>
+                                        <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Benchmark % (S&P)</label>
+                                        <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -231,10 +237,6 @@
                                     <div>
                                         <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Arb. Spread ($)</label>
                                         <input type="number" id="arbitrageSpread" step="0.01" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Benchmark % (S&P)</label>
-                                        <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
                                     </div>
                                 </div>
                                 
@@ -346,8 +348,8 @@
         let activeSystemIndex = 0;
         let systems = [{ systemName: "System A" }];
         
-        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI', 'benchmarkRate'];
-        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark'];
+        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'selfConsumption', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate'];
         
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
@@ -515,7 +517,7 @@
             const annualMaintBase = parseFloat(getVal('annualMaint') || 250);
             const sigAIEnabled = getVal('sigAI') === true || getVal('sigAI') === "true";
             const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
-            const benchmarkRate = (parseFloat(getVal('benchmarkRate')) || 7) / 100;
+            const benchmarkRate = (parseFloat(globals.benchmarkRate) || 7) / 100;
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
             const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
             
@@ -757,7 +759,7 @@
         async function copyShareLink() {
             saveInputs();
             const globals = {};
-            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false };
+            const defaultGlobals = { monthlyBill: 150, annualUsage: 10500, roofCost: 0, modelYears: 25, inflation: 3, compareMode: false, showBenchmark: true, benchmarkRate: 7.0 };
             globalInputIds.forEach(id => {
                 const el = document.getElementById(id);
                 let val = el.type === 'checkbox' ? el.checked : el.value;
@@ -804,7 +806,7 @@
                     const rawGlobals = Array.isArray(decoded) ? decoded[1] : decoded.g;
                     const unpackVal = (id, val) => {
                         if (id === 'utility' || id === 'ownership') return revValMap[id][val];
-                        if (['hasBattery', 'enableReplace', 'sigAI', 'compareMode'].includes(id)) return val === 1;
+                        if (['hasBattery', 'enableReplace', 'sigAI', 'compareMode', 'showBenchmark'].includes(id)) return val === 1;
                         return val;
                     };
                     if (confirm("Load shared configuration?")) {
