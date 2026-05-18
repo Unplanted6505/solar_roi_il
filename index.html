@@ -1018,6 +1018,7 @@
             }
             charts.flow = new Chart(ctxF, {
                 data: { labels, datasets },
+                plugins: [breakevenLinePlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
@@ -1056,8 +1057,7 @@
                                     }
                                 }
                             }
-                        },
-                        breakevenLine: breakevenLinePlugin
+                        }
                     },
                     scales: {
                         y: { 
