@@ -691,23 +691,36 @@
                         const mUsage = (annualUsage * loadWeights[m]) / 12;
                         const avgDP = mProd / 30.4;
                         const avgDU = mUsage / 30.4;
-                        const volatility = Math.min(0.95, 0.85 + ((avgDP > 0 ? (currentBattKwh / avgDP) : 1) * 0.05));
+                        // More conservative volatility: Floor 0.65, scaling 0.12, max 0.88.
+                        // Accounts for the "Carry-over" limit and multi-day cloud cover.
+                        const batteryToSolarRatio = avgDP > 0 ? (currentBattKwh / avgDP) : 0;
+                        const volatility = Math.min(0.88, 0.65 + (Math.min(2, batteryToSolarRatio) * 0.12));
+                        
                         const dDirect = Math.min(avgDP, avgDU * directUseRate);
                         const mCapture = Math.min(Math.max(0, avgDP - dDirect), currentBattKwh * 0.94, (avgDU - dDirect) / 0.94) * volatility;
                         used += (dDirect + (mCapture * 0.94)) * 30.4;
                     }
-                    return (used * yrRate) + (Math.max(0, p - used) * yrExportRate);
+                    return {
+                        savings: (used * yrRate) + (Math.max(0, p - used) * yrExportRate),
+                        energyUsed: used
+                    };
                 };
 
-                const solarSavings = calcYearSavings(yrProd);
-                const solarSavingsLow = calcYearSavings(yrProdLow);
-                const solarSavingsHigh = calcYearSavings(yrProdHigh);
+                const resMid = calcYearSavings(yrProd);
+                const solarSavings = resMid.savings;
+                const yrUsedPhysically = resMid.energyUsed;
+
+                const resLow = calcYearSavings(yrProdLow);
+                const solarSavingsLow = resLow.savings;
+
+                const resHigh = calcYearSavings(yrProdHigh);
+                const solarSavingsHigh = resHigh.savings;
 
                 if (yr === 1) {
-                    yr1SelfConsumptionPct = yrProd > 0 ? (solarSavings / (yrProd * yrRate)) : 1.0; // Approximation for KPI
-                    const solarCycles = effectiveBatterySize > 0 ? ((solarSavings - (yrProd * directUseRate * yrRate)) / (effectiveBatterySize * 0.94 * yrRate)) : 0; 
-                    const extraGridCycles = sigAIEnabled ? Math.max(25, 150 - (solarCycles * 0.6)) : 0;
-                    yr1TotalCycles = Math.round(solarCycles + extraGridCycles);
+                    yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedPhysically / yrProd) : 1.0; 
+                    const solarCycles = effectiveBatterySize > 0 ? ((yrUsedPhysically - (yrProd * directUseRate)) / (effectiveBatterySize * 0.94)) : 0; 
+                    const extraGridCycles = sigAIEnabled ? Math.max(25, 150 - (Math.max(0, solarCycles) * 0.6)) : 0;
+                    yr1TotalCycles = Math.round(Math.max(0, solarCycles) + extraGridCycles);
                 }
 
                 const yrInsurance = insuranceBase * Math.pow(1 + inflation, yr - 1);

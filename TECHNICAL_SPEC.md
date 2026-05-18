@@ -38,7 +38,7 @@ Daily savings are calculated via a volatility-adjusted simulation:
 1.  **Direct Use Rate:** Derived from user lifestyle (Standard: 25%, WFH: 35%, etc.).
 2.  **Daily Direct Use:** `min(Daily Production, Daily Load * Direct Use Rate)`.
 3.  **Battery Capture:** `min(Excess Solar, Effective Battery Capacity * 0.94, Nightly Load / 0.94) * Volatility`.
-4.  **Volatility Factor:** `min(0.95, 0.85 + (Battery:Solar Ratio * 0.05))`. This rewards larger storage with higher capture reliability.
+4.  **Volatility Factor:** `min(0.88, 0.65 + (Battery:Solar Ratio * 0.12))`. This penalizes monthly average models for failing to account for multi-day cloud cover and battery saturation during consecutive sunny days. Lowers the optimistic bias of simplified simulations.
 
 ### Weather & Production Volatility
 To account for inter-annual weather variation, the model calculates three distinct production paths:
