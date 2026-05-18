@@ -55,9 +55,12 @@ Daily savings are calculated via a volatility-adjusted simulation:
 
 ### Arbitrage & Grid Services (BESH/Hourly Pricing)
 Calculated if Intelligent Arbitrage is enabled:
-1.  **PLC Savings:** `min(Base PLC, Battery Size / 4) * $120`. Assumes the battery can shed 4 hours of peak load during capacity calls.
-2.  **Energy Arbitrage:** `Battery Size * 0.8 (DoD) * 150 (Cycles/yr) * Net Spread`.
-3.  **Net Spread:** `Arbitrage Spread - (0.15 * (0.02 + Delivery Rate))`. This accounts for efficiency losses and delivery-side friction.
+1.  **PLC Savings:** `min(Base PLC, Battery Size / 4) * $120 * 0.8 (Reliability Factor)`.
+    *   *Audit Note:* The 0.8 factor accounts for the retroactive and predictive nature of identifying the 5 annual peak hours in the Illinois market.
+2.  **Energy Arbitrage:** `Battery Size * 0.8 (DoD) * 150 (EFC/yr) * Net Spread`.
+3.  **Net Spread:** `Arbitrage Spread - (0.15 * (0.02 + Delivery Rate))`.
+4.  **Annual Equivalent Full Cycles (EFC) KPI:** `Total EFC = Solar EFC + max(25, 150 - (Solar EFC * 0.6))`. 
+    *   *Coordinated Dispatch:* This models the "Displacement" effect where solar-charged energy already satisfies evening arbitrage windows. Grid-charging cycles are primarily used to "fill the gaps" during low-solar months. Provides a realistic throughput estimate for modern LFP systems.
 
 ### Payback & ROI
 *   **Payback Period:** The first year where `Cumulative Cash Flow >= 0`.
@@ -68,7 +71,8 @@ Calculated if Intelligent Arbitrage is enabled:
 
 ## 4. Degradation Factors
 *   **Solar Panels:** 0.5% annual production loss.
-*   **Battery Capacity:** 2.5% annual capacity loss (impacts both arbitrage and self-consumption capture).
+*   **Battery Capacity:** 1.5% annual capacity loss (impacts both arbitrage and self-consumption capture).
+    *   *Rationale:* While performance guarantees (warranties) often floor at 70% at Year 10 (3%/yr), LFP (Lithium Iron Phosphate) chemistry realistically performs closer to 1.5% in residential environments, hitting ~85% at Year 10.
 
 ---
-*Technical Spec Version: 1.0.0 (June 2026 IL Market Profile)*
+*Technical Spec Version: 1.1.0 (Audit Hardened - June 2026)*

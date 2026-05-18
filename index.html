@@ -73,7 +73,7 @@
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="text-left">
-                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter dark:text-emerald-400">Solar ROI Analyst <span class="text-gray-400 font-light">IL 2026</span></h1>
+                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter dark:text-emerald-400">Solar ROI Analyst <span class="text-gray-400 font-light text-sm">v1.1.0</span></h1>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">June 2026 SREC (50/50) & Arbitrage</p>
                 </div>
             </div>
@@ -372,7 +372,7 @@
 
                 <!-- Comparison Table -->
                 <div id="comparisonView" class="hidden bg-white p-10 rounded-[2.5rem] shadow-sm border-2 border-emerald-500/10 space-y-8">
-                    <h3 class="font-black text-gray-800 text-sm uppercase tracking-[0.3em] text-center">Comparative System Analysis</h3>
+                    <h3 id="tableTitle" class="font-black text-gray-800 text-sm uppercase tracking-[0.3em] text-center">Comparative System Analysis</h3>
                     <div class="overflow-x-auto no-scrollbar">
                         <table class="w-full text-xs text-left">
                             <thead class="border-b-2 border-gray-50"><!-- Populated by JS --></thead>
@@ -386,7 +386,12 @@
                 <!-- Performance Charts -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-24">
                     <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Equipment Health: Battery Capacity</h3>
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="font-bold text-gray-400 text-[10px] uppercase tracking-[0.2em]">Equipment Health: Battery Capacity</h3>
+                            <div class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                Est. <span id="totalCycles">0</span> EFC/Yr
+                            </div>
+                        </div>
                         <div class="h-[200px] md:h-[220px]"><canvas id="batteryChart"></canvas></div>
                     </div>
                     <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
@@ -420,7 +425,7 @@
             systemName: "New System", utility: "comed", ownership: "owned",
             solarCost: 25000, solarSize: 10, hasBattery: true, batteryCost: 10000, batterySize: 13.5,
             manualProduction: 12000, selfConsumption: 85, efficiencyLoss: 15,
-            solarDegradation: 0.5, battDegradation: 2.5, battReplaceYear: 12, battReplaceCost: 8000,
+            solarDegradation: 0.5, battDegradation: 1.5, battReplaceYear: 12, battReplaceCost: 8000,
             invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250, arbitrageSpread: 0.08,
             srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: true
         };
@@ -586,9 +591,8 @@
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
             const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
             
-            const srecRates = { comed: 78, ameren: 70 };
-            let sPrice = baseSrecInput || srecRates[utility] || 78;
-            if (ownership === 'owned') sPrice += 20;
+            const sPrice = baseSrecInput || (utility === 'comed' ? 78 : 70);
+            const finalSPrice = ownership === 'owned' ? sPrice + 20 : sPrice;
             const rates = { comed: { total: 0.171, supply: 0.096 }, ameren: { total: 0.165, supply: 0.088 } };
             const uRates = rates[utility] || rates.comed;
             const currentRate = uRates.total;
@@ -596,11 +600,11 @@
             const dgRebate = solarSize * 300;
             const batteryRebate = hasBattery ? (batterySize * 300) : 0;
             const totalImmRebate = dgRebate + batteryRebate;
-            const totalSrecValue = ((annualProdBase * 15 * sPrice) / 1000) * (1 - (srecFeePct / 100));
+            const totalSrecValue = ((annualProdBase * 15 * finalSPrice) / 1000) * (1 - (srecFeePct / 100));
             const upfrontSrec = totalSrecValue * 0.5;
             const annualSrecTail = (totalSrecValue * 0.5) / 6;
             
-            let flowData = [], healthData = [], prodData = [], srecYearly = [], benchmarkData = [];
+            let flowData = [], healthData = [], prodData = [], srecYearly = [], benchmarkData = [], yearlyBreakdown = [];
             const effectiveBatterySize = hasBattery ? batterySize : 0;
             const effectiveBatteryCost = hasBattery ? batteryCost : 0;
             const upfrontOutlay = solarCost + effectiveBatteryCost + roofCost - totalImmRebate;
@@ -609,11 +613,11 @@
             let paybackYear = null;
             let year1ArbTotal = 0;
             let yr1SelfConsumptionPct = 0;
+            let yr1TotalCycles = 0;
             
             const lifestyleBases = { evening: 0.15, standard: 0.25, wfh: 0.35, heavy: 0.45 };
             const directUseRate = globals.lifestyle ? (lifestyleBases[globals.lifestyle] || 0.25) : 0.25;
 
-            // Monthly weights for Illinois (Production and Load)
             const solarWeights = [0.45, 0.65, 0.90, 1.15, 1.35, 1.50, 1.50, 1.35, 1.10, 0.85, 0.55, 0.40];
             const loadWeights = [0.85, 0.80, 0.85, 0.90, 1.00, 1.30, 1.45, 1.35, 1.10, 0.90, 0.85, 0.95];
 
@@ -625,6 +629,7 @@
                     prodData.push(0);
                     srecYearly.push(Math.round(upfrontSrec));
                     benchmarkData.push(0);
+                    yearlyBreakdown.push({ year: 0, srec: upfrontSrec, savings: 0, arbitrage: 0, costs: -upfrontOutlay, balance: currentBalance });
                     if (currentBalance >= 0) paybackYear = 0;
                     continue;
                 }
@@ -632,79 +637,72 @@
                 const yrRate = currentRate * Math.pow(1 + inflation, yr - 1);
                 const yrExportRate = exportRate * Math.pow(1 + inflation, yr - 1);
                 
-                // Monthly Simulation with Weather Volatility
                 let yrUsedDirectly = 0;
+                let yrSolarBatteryThroughput = 0;
                 for (let m = 0; m < 12; m++) {
                     const daysInMonth = 30.4;
                     const monthProd = (yrProd * solarWeights[m]) / 12;
                     const monthUsage = (annualUsage * loadWeights[m]) / 12;
-                    
                     const avgDailyProd = monthProd / daysInMonth;
                     const avgDailyUsage = monthUsage / daysInMonth;
-                    
-                    // Dynamic Volatility: A large battery mitigates weather swings.
-                    // Base volatility of 0.85, improving up to 0.95 with large storage.
                     const batteryToSolarRatio = avgDailyProd > 0 ? (currentBattKwh / avgDailyProd) : 1;
                     const volatility = Math.min(0.95, 0.85 + (batteryToSolarRatio * 0.05));
-                    
                     const dailyDirect = Math.min(avgDailyProd, avgDailyUsage * directUseRate);
                     const excessSolar = Math.max(0, avgDailyProd - dailyDirect);
-                    
                     const nightlyLoad = avgDailyUsage - dailyDirect;
                     const dailyCapture = Math.min(excessSolar, currentBattKwh * 0.9, nightlyLoad / 0.9) * volatility;
-                    
-                    yrUsedDirectly += (dailyDirect + (dailyCapture * 0.9)) * daysInMonth;
+                    const captureDischarged = dailyCapture * 0.9;
+                    yrUsedDirectly += (dailyDirect + captureDischarged) * daysInMonth;
+                    yrSolarBatteryThroughput += captureDischarged * daysInMonth;
                 }
 
-                if (yr === 1) yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedDirectly / yrProd) : 1.0;
-                const usedDirectly = yrUsedDirectly;
-                const exported = Math.max(0, yrProd - usedDirectly);
+                if (yr === 1) {
+                    yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedDirectly / yrProd) : 1.0;
+                    const solarCycles = effectiveBatterySize > 0 ? (yrSolarBatteryThroughput / effectiveBatterySize) : 0;
+                    // Coordinated Displacement: Solar cycles already perform arbitrage. 
+                    // We only add grid cycles that don't overlap with solar throughput.
+                    const extraGridCycles = sigAIEnabled ? Math.max(25, 150 - (solarCycles * 0.6)) : 0;
+                    yr1TotalCycles = Math.round(solarCycles + extraGridCycles);
+                }
+
                 const yrInsurance = (solarCost * insuranceRate) * Math.pow(1 + inflation, yr - 1);
-                currentBalance -= (annualMaintBase * Math.pow(1 + inflation, yr - 1)) + yrInsurance;
+                const yrMaint = annualMaintBase * Math.pow(1 + inflation, yr - 1);
+                let yrReplacementCost = 0;
+                if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) yrReplacementCost += battReplaceCost;
+                if (yr > 0 && yr % invReplaceYear === 0) yrReplacementCost += invReplaceCost;
                 
-                if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) {
-                    currentBalance -= battReplaceCost;
-                    currentBattKwh = effectiveBatterySize;
-                }
-                if (yr > 0 && yr % invReplaceYear === 0) {
-                    currentBalance -= invReplaceCost;
-                }
+                const solarSavings = (yrUsedDirectly * yrRate) + (Math.max(0, yrProd - yrUsedDirectly) * yrExportRate);
+                let yrSavings = solarSavings;
+                let arbSavings = 0;
 
-                const energyBillNoSolar = annualUsage * yrRate;
-                const basePlc = 3.0; 
-                const capacityBill = basePlc * 120 * Math.pow(1 + inflation, yr - 1);
-                const fixedFloor = 15 * 12 * Math.pow(1 + inflation, yr - 1);
-                const totalBillNoSolar = energyBillNoSolar + capacityBill + fixedFloor;
-                
-                let yrSavings = (usedDirectly * yrRate) + (exported * yrExportRate);
                 if (sigAIEnabled && effectiveBatterySize > 0) {
-                    const plcSavings = Math.min(basePlc, currentBattKwh / 4.0) * 120 * Math.pow(1 + inflation, yr - 1);
-                    const delivRate = yrRate - yrExportRate;
-                    const netSpread = Math.max(0, arbitrageSpread - (0.15 * (0.02 + delivRate)));
+                    const plcSavings = Math.min(3.0, currentBattKwh / 4.0) * 120 * 0.8 * Math.pow(1 + inflation, yr - 1);
+                    const netSpread = Math.max(0, arbitrageSpread - (0.15 * (0.02 + (yrRate - yrExportRate))));
                     const energyArb = (currentBattKwh * 0.8 * 150 * netSpread);
-                    const remainingBill = Math.max(0, energyBillNoSolar - yrSavings) + capacityBill;
-                    const arbSavings = Math.min(plcSavings + energyArb, remainingBill);
+                    arbSavings = Math.min(plcSavings + energyArb, (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavings);
                     yrSavings += arbSavings;
                     if (yr === 1) year1ArbTotal = arbSavings;
                 }
-                yrSavings = Math.min(yrSavings, totalBillNoSolar - fixedFloor);
-                currentBalance += yrSavings;
-                let srecIncome = 0;
-                if (yr >= 1 && yr <= 6) srecIncome += annualSrecTail;
-                currentBalance += srecIncome;
-                srecYearly.push(Math.round(srecIncome));
+                
+                let srecIncome = (yr >= 1 && yr <= 6) ? annualSrecTail : 0;
+                const netAnnualCash = yrSavings + srecIncome - yrMaint - yrInsurance - yrReplacementCost;
+                currentBalance += netAnnualCash;
+
+                yearlyBreakdown.push({
+                    year: yr, srec: Math.round(srecIncome), savings: Math.round(solarSavings),
+                    arbitrage: Math.round(arbSavings), costs: -Math.round(yrMaint + yrInsurance + yrReplacementCost),
+                    balance: Math.round(currentBalance)
+                });
+
                 if (paybackYear === null && currentBalance >= 0) paybackYear = yr;
                 flowData.push(Math.round(currentBalance));
                 healthData.push(currentBattKwh.toFixed(1));
                 prodData.push(Math.round(yrProd));
-                
-                const benchmarkProfit = (upfrontOutlay * Math.pow(1 + benchmarkRate, yr)) - upfrontOutlay;
-                benchmarkData.push(Math.round(benchmarkProfit));
-
+                benchmarkData.push(Math.round((upfrontOutlay * Math.pow(1 + (globals.benchmarkRate/100 || 0.07), yr)) - upfrontOutlay));
                 currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
             }
             return {
-                flowData, healthData, prodData, srecYearly, benchmarkData,
+                flowData, healthData, prodData, srecYearly, benchmarkData, yearlyBreakdown,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
                 solarOffset: Math.round((annualProdBase / annualUsage) * 100),
@@ -712,7 +710,8 @@
                 ppw: solarSize > 0 ? (solarCost / (solarSize * 1000)) : 0,
                 bpkwh: effectiveBatterySize > 0 ? (effectiveBatteryCost / effectiveBatterySize) : 0,
                 modelYears, solarSize, batterySize: effectiveBatterySize, hasBattery, sigAI: sigAIEnabled,
-                selfConsumptionPct: yr1SelfConsumptionPct * 100
+                selfConsumptionPct: yr1SelfConsumptionPct * 100,
+                totalCycles: yr1TotalCycles
             };
         }
 
@@ -730,6 +729,10 @@
             // Update Self-Consumption Widget
             const scDisp = document.getElementById('selfConsumptionDisp');
             if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
+
+            // Update Cycles KPI
+            const cycleDisp = document.getElementById('totalCycles');
+            if (cycleDisp) cycleDisp.innerText = result.totalCycles;
 
             const compareMode = document.getElementById('compareMode').checked;
             updateSpectrum('solarPointer', result.ppw, 2.6, 3.8);
@@ -760,20 +763,23 @@
                 row.classList.add('hidden');
             }
             const compView = document.getElementById('comparisonView');
+            const compTable = document.querySelector('#comparisonView table');
+            const tableTitle = document.getElementById('tableTitle');
+            const tbody = document.getElementById('comparisonTableBody');
+            
             if (compareMode) {
                 compView.classList.remove('hidden');
-                const compTable = document.querySelector('#comparisonView table');
+                tableTitle.innerText = "Comparative System Analysis";
                 let headerRow = `<tr class="border-b-2 border-gray-50"><th class="py-4 text-[10px] uppercase text-gray-400 tracking-widest font-black">Metric</th>`;
                 systems.forEach(s => {
                     headerRow += `<th class="py-4 text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px] font-black text-emerald-700" title="${s.systemName}">${s.systemName || "Unnamed"}</th>`;
                 });
                 headerRow += "</tr>";
                 compTable.querySelector('thead').innerHTML = headerRow;
-                const tbody = document.getElementById('comparisonTableBody');
-                tbody.innerHTML = "";
                 const metrics = [
                     { label: "Solar Size", key: "solarSize", suffix: " kW" },
                     { label: "Battery", key: "batterySize", suffix: " kWh" },
+                    { label: "Cycles/Yr", key: "totalCycles", suffix: "" },
                     { label: "Net Cost", key: "netCost", isCurrency: true },
                     { label: "Payback", key: "paybackYear", suffix: " Yrs" },
                     { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true }
@@ -786,7 +792,7 @@
                         if (m.isCurrency) val = formatCurrency(val);
                         else if (val === null) val = "N/A";
                         else val = val + (m.suffix || "");
-                        row += `<td class="py-4 text-center font-black text-gray-900">${val}</td>`;
+                        row += `<td class="py-4 text-center font-black text-gray-900 dark:text-gray-100">${val}</td>`;
                     });
                     row += "</tr>";
                     tbody.innerHTML += row;
@@ -828,9 +834,6 @@
                 } 
             };
             const datasets = [];
-            if (!compareMode && mainResult) {
-                datasets.push({ type: 'bar', label: 'SREC Payments', data: mainResult.srecYearly, backgroundColor: isDark ? 'rgba(251, 191, 36, 0.2)' : 'rgba(251, 191, 36, 0.4)', yAxisID: 'ySrec', barThickness: 20 });
-            }
             const palette = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
             allResults.forEach((r, i) => {
                 const sysName = systems[compareMode ? i : activeSystemIndex].systemName || ("Sys " + (i+1));
@@ -855,23 +858,77 @@
                 } else {
                     backgroundColor = (allResults.length === 1 || i === activeSystemIndex) ? `${palette[i % palette.length]}1A` : 'transparent';
                 }
-                datasets.push({ type: 'line', label: sysName, data: r.flowData, borderColor: borderColor, borderWidth: 4, backgroundColor: backgroundColor, fill: (!compareMode || i === activeSystemIndex), tension: 0.3, pointRadius: allResults.length > 5 ? 0 : 4, segment: segment });
+                datasets.push({ 
+                    type: 'line', 
+                    label: sysName, 
+                    data: r.flowData, 
+                    borderColor: borderColor, 
+                    borderWidth: 4, 
+                    backgroundColor: backgroundColor, 
+                    fill: (!compareMode || i === activeSystemIndex), 
+                    tension: 0.3, 
+                    pointRadius: allResults.length > 5 ? 0 : 4, 
+                    segment: segment,
+                    breakdown: r.yearlyBreakdown
+                });
             });
             const showBenchmark = document.getElementById('showBenchmark').checked;
             if (showBenchmark && mainResult) {
                 const bRate = (parseFloat(document.getElementById('benchmarkRate').value) || 7);
                 datasets.push({ type: 'line', label: `Benchmark (${bRate}%)`, data: mainResult.benchmarkData, borderColor: isDark ? '#475569' : '#9ca3af', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0.1 });
             }
-            charts.flow = new Chart(ctxF, { 
-                data: { labels, datasets }, plugins: [breakevenLinePlugin],
-                options: { 
-                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35 } }, 
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: textColor, font: { weight: 'bold', size: 10 } } }, tooltip: { mode: 'index', intersect: false } }, 
-                    scales: { 
-                        y: { ticks: { color: textColor, callback: (v) => '$' + v.toLocaleString(), font: { size: 10 } }, grid: { color: (c) => c.tick.value === 0 ? (isDark ? '#475569' : '#374151') : gridColor, lineWidth: (c) => c.tick.value === 0 ? 3 : 1 } }, 
-                        ySrec: { position: 'right', display: false, min: 0 }, 
-                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } } 
-                    } 
+            charts.flow = new Chart(ctxF, {
+                data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: compareMode, position: 'top', labels: { color: textColor, font: { weight: 'bold', size: 10 } } },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#fff',
+                            titleColor: isDark ? '#f8fafc' : '#1e293b',
+                            bodyColor: isDark ? '#94a3b8' : '#64748b',
+                            borderColor: isDark ? '#334155' : '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: (context) => {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
+                                    return label;
+                                },
+                                afterBody: (context) => {
+                                    const idx = context[0].dataIndex;
+                                    const ds = context[0].dataset;
+                                    if (ds.breakdown && ds.breakdown[idx]) {
+                                        const b = ds.breakdown[idx];
+                                        if (idx === 0) return [`\nInitial Outlay: ${formatCurrency(b.costs)}`, `SREC Upfront: ${formatCurrency(b.srec)}`];
+                                        const lines = [''];
+                                        if (b.savings) lines.push(`Solar Savings: ${formatCurrency(b.savings)}`);
+                                        if (b.arbitrage) lines.push(`Arbitrage: ${formatCurrency(b.arbitrage)}`);
+                                        if (b.srec) lines.push(`SREC Tail: ${formatCurrency(b.srec)}`);
+                                        if (b.costs) lines.push(`Expenses: ${formatCurrency(b.costs)}`);
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        breakevenLine: breakevenLinePlugin
+                    },
+                    scales: {
+                        y: { 
+                            grid: { color: gridColor }, 
+                            ticks: { 
+                                color: textColor, 
+                                font: { size: 10, weight: 'bold' },
+                                callback: value => formatCurrency(value)
+                            } 
+                        },
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10, weight: 'bold' } } }
+                    }
                 }
             });
             if (mainResult) {

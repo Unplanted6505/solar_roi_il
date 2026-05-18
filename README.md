@@ -14,11 +14,11 @@ As of June 2026, this model assumes the **Federal Investment Tax Credit (ITC) ha
 *   Direct energy savings (Avoided Cost).
 *   Illinois Shines SREC payments.
 *   Utility Distributed Generation (DG) and Battery rebates.
-*   Grid services and arbitrage (for battery owners).
+*   Intelligent arbitrage and grid services.
 
 ### 2. Illinois Shines (SREC) Payout Structure
 The tool models the **June 2026 "50/50" Payout Split**:
-*   **50% Upfront:** Applied as a cash infusion in Year 0 (or Year 1 depending on interconnection timing).
+*   **50% Upfront:** Applied as a cash infusion in Year 0.
 *   **50% Tail:** The remaining value is distributed evenly over the first 6 years of the system's life.
 *   **Ownership Bonus:** Assumes a +$20/SREC premium for direct ownership vs. third-party arrangements.
 
@@ -31,15 +31,17 @@ Illinois has transitioned away from 1:1 Net Metering. The calculation engine use
 ### 4. Battery Storage & Intelligent Arbitrage
 The battery model is optimized for high-efficiency LFP systems and includes:
 *   **Round-Trip Efficiency:** Modeled at **81%** (90% charge / 90% discharge factor).
+*   **Annual Equivalent Full Cycles (EFC) KPI:** Provides visibility into battery wear by tracking combined throughput from solar storage and grid arbitrage.
 *   **BESH Arbitrage:** For ComEd customers on Hourly Pricing, the tool models dynamic energy arbitrage (default $0.08/kWh spread).
-*   **Grid Services & PLC Reduction:** Calculates savings from lowering the homeowner's Peak Load Contribution (Capacity Charge) and optimized load shifting.
-*   **Degradation:** Defaulting to a 2.5% annual capacity loss.
+*   **Conservative PLC Reduction:** Calculates savings from lowering the Peak Load Contribution (Capacity Charge). 
+    *   *Note:* A **0.8 reliability factor** is applied to account for the difficulty in predicting Illinois's retroactive peak hours.
+*   **Degradation:** Defaulting to a **1.5% annual capacity loss**, reflecting the superior durability of premium LFP chemistry.
 
-### 5. Operating Costs
-To ensure realism, the tool includes:
+### 5. Operating Costs & Transparency
 *   **Annual Insurance:** Calculated as **0.75% of the Solar Array cost**, scaling with inflation.
 *   **Annual Maintenance:** A user-defined dollar amount to account for non-warranty labor or cleaning.
-*   **Component Replacement:** Sinking funds for Inverter (Year 15) and Battery (Year 12) replacements.
+*   **Component Replacement:** Sinking funds for Inverter (Year 15) and Battery (Year 12).
+*   **Hover Transparency:** Detailed yearly breakdowns (Savings, Arbitrage, SRECs, Expenses) are available by hovering over any data point on the ROI chart.
 
 ---
 
@@ -53,4 +55,4 @@ To ensure realism, the tool includes:
 This tool is for educational and analytical purposes only. Solar production is subject to weather volatility, and utility rates are subject to change by the ICC. Always verify quotes with a certified Illinois Distributed Generation Installer.
 
 ---
-*Developed for the Illinois Solar Community - 2026 Edition.*
+*Developed for the Illinois Solar Community - June 2026 Edition (v1.1.0).*
