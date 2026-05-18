@@ -817,7 +817,7 @@
                         el.innerText = result.modelYears + "+ Yrs";
                         el.classList.add('leading-none');
                     } else {
-                        el.innerHTML = `<div>${mid} Yrs</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">Range: ${low || mid}-${high || result.modelYears + '+'} Yrs</div>`;
+                        el.innerHTML = `<div>${mid} Yrs</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">${low || mid}-${high || result.modelYears + '+'} Yrs</div>`;
                         el.classList.remove('leading-none');
                     }
                 } else {
@@ -858,7 +858,7 @@
                     const high = result.flowDataHigh[result.modelYears];
                     const mid = result.lifetimeSavings;
                     const delta = Math.round((high - low) / 2);
-                    el.innerHTML = `<div>${formatCurrency(mid)}</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">± ${formatCurrency(delta)} Range</div>`;
+                    el.innerHTML = `<div>${formatCurrency(mid)}</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">± ${formatCurrency(delta)}</div>`;
                     el.classList.remove('leading-none');
                     
                     tooltipHTML += `
@@ -886,7 +886,7 @@
 
             document.querySelectorAll('#annualizedReturn').forEach(el => {
                 if (!compareMode) {
-                    el.innerHTML = `<div>${annualReturn.toFixed(1)}%</div><div class="text-[11px] font-black text-emerald-300/50 mt-1 uppercase tracking-widest">Range: ${annualReturnLow.toFixed(1)}% - ${annualReturnHigh.toFixed(1)}%</div>`;
+                    el.innerHTML = `<div>${annualReturn.toFixed(1)}%</div><div class="text-[11px] font-black text-emerald-300/50 mt-1 uppercase tracking-widest">${annualReturnLow.toFixed(1)}% - ${annualReturnHigh.toFixed(1)}%</div>`;
                     el.classList.remove('leading-none');
                 } else {
                     el.innerText = annualReturn.toFixed(1) + "%";
