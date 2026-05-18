@@ -629,7 +629,17 @@
                     prodData.push(0);
                     srecYearly.push(Math.round(upfrontSrec));
                     benchmarkData.push(0);
-                    yearlyBreakdown.push({ year: 0, srec: upfrontSrec, savings: 0, arbitrage: 0, costs: -upfrontOutlay, balance: currentBalance });
+                    yearlyBreakdown.push({ 
+                        year: 0, 
+                        srec: upfrontSrec, 
+                        savings: 0, 
+                        arbitrage: 0, 
+                        insurance: 0,
+                        maint: 0,
+                        replacement: 0,
+                        initialOutlay: -upfrontOutlay, 
+                        balance: currentBalance 
+                    });
                     if (currentBalance >= 0) paybackYear = 0;
                     continue;
                 }
@@ -689,8 +699,13 @@
                 currentBalance += netAnnualCash;
 
                 yearlyBreakdown.push({
-                    year: yr, srec: Math.round(srecIncome), savings: Math.round(solarSavings),
-                    arbitrage: Math.round(arbSavings), costs: -Math.round(yrMaint + yrInsurance + yrReplacementCost),
+                    year: yr, 
+                    srec: Math.round(srecIncome), 
+                    savings: Math.round(solarSavings),
+                    arbitrage: Math.round(arbSavings), 
+                    insurance: -Math.round(yrInsurance),
+                    maint: -Math.round(yrMaint),
+                    replacement: -Math.round(yrReplacementCost),
                     balance: Math.round(currentBalance)
                 });
 
@@ -905,12 +920,14 @@
                                     const ds = context[0].dataset;
                                     if (ds.breakdown && ds.breakdown[idx]) {
                                         const b = ds.breakdown[idx];
-                                        if (idx === 0) return [`\nInitial Outlay: ${formatCurrency(b.costs)}`, `SREC Upfront: ${formatCurrency(b.srec)}`];
+                                        if (idx === 0) return [`\nInitial Outlay: ${formatCurrency(b.initialOutlay)}`, `SREC Upfront: ${formatCurrency(b.srec)}`];
                                         const lines = [''];
                                         if (b.savings) lines.push(`Solar Savings: ${formatCurrency(b.savings)}`);
                                         if (b.arbitrage) lines.push(`Arbitrage: ${formatCurrency(b.arbitrage)}`);
                                         if (b.srec) lines.push(`SREC Tail: ${formatCurrency(b.srec)}`);
-                                        if (b.costs) lines.push(`Expenses: ${formatCurrency(b.costs)}`);
+                                        if (b.insurance) lines.push(`Insurance: ${formatCurrency(b.insurance)}`);
+                                        if (b.maint) lines.push(`Maintenance: ${formatCurrency(b.maint)}`);
+                                        if (b.replacement) lines.push(`Replacement: ${formatCurrency(b.replacement)}`);
                                         return lines;
                                     }
                                 }
