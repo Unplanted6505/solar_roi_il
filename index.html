@@ -24,14 +24,39 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <style>
-        .tooltip { position: relative; display: inline-block; cursor: help; }
+        .tooltip { position: relative; display: inline-block; cursor: pointer; }
         .tooltip .tooltiptext {
-            visibility: hidden; width: 200px; background-color: #333; color: #fff;
-            text-align: center; border-radius: 6px; padding: 8px; position: absolute;
-            z-index: 100; bottom: 125%; left: 50%; margin-left: -100px; opacity: 0;
+            visibility: hidden; width: 280px; background-color: #1e293b; color: #fff;
+            text-align: left; border-radius: 12px; padding: 16px; position: absolute;
+            z-index: 100; top: 110%; left: 50%; transform: translateX(-50%); opacity: 0;
             transition: opacity 0.3s; font-size: 0.75rem; font-weight: normal;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            line-height: 1.6;
+            pointer-events: none;
         }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        /* Mobile adjustment for narrow screens */
+        @media (max-width: 640px) {
+            .tooltip .tooltiptext {
+                width: 240px;
+                max-width: 85vw;
+            }
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #1e293b transparent;
+        }
+        .tooltip:hover .tooltiptext, .tooltip:active .tooltiptext { 
+            visibility: visible; 
+            opacity: 1; 
+            pointer-events: auto;
+        }
         input[type=range] { accent-color: #10b981; }
         .spectrum-bar { height: 8px; border-radius: 4px; background: linear-gradient(to right, #10b981, #fbbf24, #ef4444); position: relative; }
         .spectrum-pointer { position: absolute; top: -4px; width: 4px; height: 16px; background: #374151; border-radius: 2px; transition: left 0.3s ease; }
@@ -73,7 +98,7 @@
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="text-left">
-                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter dark:text-emerald-400">Solar ROI Analyst <span class="text-gray-400 font-light text-sm">v1.1.0</span></h1>
+                    <h1 class="text-2xl font-black text-emerald-700 leading-tight tracking-tighter dark:text-emerald-400">Solar ROI Analyst <span class="text-gray-400 font-light text-sm">v1.2.0</span></h1>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">June 2026 SREC (50/50) & Arbitrage</p>
                 </div>
             </div>
@@ -178,8 +203,8 @@
                                         <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
                                     </div>
                                     <div>
-                                        <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Insurance (%)</label>
-                                        <input type="number" id="insuranceRate" step="0.05" value="0.75" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                        <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Insurance ($/yr)</label>
+                                        <input type="number" id="annualInsurance" step="10" value="150" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
                                     </div>
                                     <div>
                                         <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Benchmark % (S&P)</label>
@@ -291,10 +316,6 @@
                                         <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Eff. Loss (%)</label>
                                         <input type="number" id="efficiencyLoss" oninput="updateProduction(); calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
                                     </div>
-                                    <div>
-                                        <label class="block text-[8px] font-black text-gray-400 mb-1 uppercase tracking-widest">Arb. Spread ($)</label>
-                                        <input type="number" id="arbitrageSpread" step="0.01" oninput="calculate()" class="w-full rounded-lg border-gray-200 p-2 text-xs font-black">
-                                    </div>
                                 </div>
                                 
                                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
@@ -354,9 +375,10 @@
                         <p class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.2em] mb-2">Breakeven</p>
                         <p id="paybackYears" class="text-2xl font-black text-emerald-600 leading-none">0 Yrs</p>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md tooltip">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Total Value</p>
                         <p id="lifetimeSavings" class="text-2xl font-black text-emerald-700 leading-none">$0</p>
+                        <span id="lifetimeTooltip" class="tooltiptext"></span>
                     </div>
                     <div class="bg-emerald-900 p-6 rounded-3xl shadow-2xl shadow-emerald-900/30 border border-emerald-800 text-center col-span-2 sm:col-span-1 transition-all hover:scale-[1.03]">
                         <p class="text-[10px] font-black text-emerald-300 uppercase tracking-[0.2em] mb-2">Annual ROI</p>
@@ -408,8 +430,8 @@
         let activeSystemIndex = 0;
         let systems = [{ systemName: "System A" }];
         
-        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'arbitrageSpread', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
-        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate', 'lifestyle', 'insuranceRate'];
+        const systemInputIds = ['systemName', 'utility', 'ownership', 'solarCost', 'solarSize', 'hasBattery', 'batteryCost', 'batterySize', 'manualProduction', 'efficiencyLoss', 'solarDegradation', 'battDegradation', 'battReplaceYear', 'battReplaceCost', 'invReplaceYear', 'invReplaceCost', 'annualMaint', 'srecPrice', 'srecFee', 'enableReplace', 'sigAI'];
+        const globalInputIds = ['monthlyBill', 'annualUsage', 'roofCost', 'modelYears', 'inflation', 'compareMode', 'showBenchmark', 'benchmarkRate', 'lifestyle', 'annualInsurance'];
 
         const keyMap = {
             systemName: 'a', utility: 'b', ownership: 'c', monthlyBill: 'd', annualUsage: 'e',
@@ -417,7 +439,7 @@
             manualProduction: 'k', modelYears: 'l', selfConsumption: 'm', efficiencyLoss: 'n',
             solarDegradation: 'o', inflation: 'p', battDegradation: 'q', battReplaceYear: 'r',
             battReplaceCost: 's', invReplaceYear: 't', invReplaceCost: 'u', annualMaint: 'v',
-            insuranceRate: 'G', arbitrageSpread: 'w', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
+            annualInsurance: 'G', srecPrice: 'x', srecFee: 'y', enableReplace: 'z', sigAI: 'A',
             roofCost: 'B', compareMode: 'C', benchmarkRate: 'D', showBenchmark: 'E', lifestyle: 'F'
         };        const revMap = Object.fromEntries(Object.entries(keyMap).map(([k, v]) => [v, k]));
 
@@ -425,14 +447,14 @@
             systemName: "New System", utility: "comed", ownership: "owned",
             solarCost: 25000, solarSize: 10, hasBattery: true, batteryCost: 10000, batterySize: 13.5,
             manualProduction: 12000, selfConsumption: 85, efficiencyLoss: 15,
-            solarDegradation: 0.5, battDegradation: 1.5, battReplaceYear: 12, battReplaceCost: 8000,
-            invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250, arbitrageSpread: 0.08,
+            solarDegradation: 0.5, battDegradation: 1.5, battReplaceYear: 15, battReplaceCost: 8000,
+            invReplaceYear: 15, invReplaceCost: 2500, annualMaint: 250,
             srecPrice: 0, srecFee: 15, enableReplace: false, sigAI: true
         };
 
         const defaultGlobals = { 
             monthlyBill: 150, annualUsage: 10500, roofCost: 0, 
-            modelYears: 25, inflation: 3, insuranceRate: 0.75,
+            modelYears: 25, inflation: 3, annualInsurance: 150,
             compareMode: false, showBenchmark: true, benchmarkRate: 7.0, lifestyle: 'standard' 
         };
 
@@ -524,6 +546,7 @@
             if (stored) {
                 systems = (stored.systems || systems).map(s => {
                     if (s.insuranceRate !== undefined) delete s.insuranceRate; // Cleanup legacy spec
+                    if (s.annualInsurance !== undefined) delete s.annualInsurance; // Cleanup legacy spec
                     return s;
                 });
                 activeSystemIndex = stored.activeIndex || 0;
@@ -578,14 +601,14 @@
             const solarDegrRate = parseFloat(getVal('solarDegradation') !== undefined ? getVal('solarDegradation') : 0.5) / 100;
             const battDegrRate = parseFloat(getVal('battDegradation') !== undefined ? getVal('battDegradation') : 2.5) / 100;
             const enableReplace = getVal('enableReplace') === true || getVal('enableReplace') === "true";
-            const battReplaceYear = parseInt(getVal('battReplaceYear') || 12);
+            const battReplaceYear = parseInt(getVal('battReplaceYear') || 15);
             const battReplaceCost = parseFloat(getVal('battReplaceCost') || 8000);
             const invReplaceYear = parseInt(getVal('invReplaceYear') || 15);
             const invReplaceCost = parseFloat(getVal('invReplaceCost') || 2500);
             const annualMaintBase = parseFloat(getVal('annualMaint') || 250);
-            const insuranceRate = (parseFloat(globals.insuranceRate) || 0.75) / 100;
+            const insuranceBase = parseFloat(globals.annualInsurance) || 150;
             const sigAIEnabled = getVal('sigAI') === true || getVal('sigAI') === "true";
-            const arbitrageSpread = parseFloat(getVal('arbitrageSpread') !== undefined ? getVal('arbitrageSpread') : 0.08);
+            const arbitrageSpread = 0.08;
             const benchmarkRate = (parseFloat(globals.benchmarkRate) || 7) / 100;
             const lifestyle = getVal('lifestyle') || 'standard';
             const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
@@ -604,17 +627,21 @@
             const upfrontSrec = totalSrecValue * 0.5;
             const annualSrecTail = (totalSrecValue * 0.5) / 6;
             
-            let flowData = [], healthData = [], prodData = [], srecYearly = [], benchmarkData = [], yearlyBreakdown = [];
+            let flowData = [], flowDataLow = [], flowDataHigh = [], healthData = [], prodData = [], srecYearly = [], benchmarkData = [], yearlyBreakdown = [];
             const effectiveBatterySize = hasBattery ? batterySize : 0;
             const effectiveBatteryCost = hasBattery ? batteryCost : 0;
             const upfrontOutlay = solarCost + effectiveBatteryCost + roofCost - totalImmRebate;
             let currentBalance = -upfrontOutlay;
+            let currentBalanceLow = -upfrontOutlay;
+            let currentBalanceHigh = -upfrontOutlay;
             let currentBattKwh = effectiveBatterySize;
-            let paybackYear = null;
+            let paybackYear = null, paybackYearLow = null, paybackYearHigh = null;
             let year1ArbTotal = 0;
             let yr1SelfConsumptionPct = 0;
             let yr1TotalCycles = 0;
             
+            const prodVariance = 0.05; // 5% weather/production variance
+
             const lifestyleBases = { evening: 0.15, standard: 0.25, wfh: 0.35, heavy: 0.45 };
             const directUseRate = globals.lifestyle ? (lifestyleBases[globals.lifestyle] || 0.25) : 0.25;
 
@@ -624,7 +651,11 @@
             for (let yr = 0; yr <= modelYears; yr++) {
                 if (yr === 0) {
                     currentBalance += upfrontSrec;
+                    currentBalanceLow += upfrontSrec;
+                    currentBalanceHigh += upfrontSrec;
                     flowData.push(Math.round(currentBalance));
+                    flowDataLow.push(Math.round(currentBalanceLow));
+                    flowDataHigh.push(Math.round(currentBalanceHigh));
                     healthData.push(currentBattKwh.toFixed(1));
                     prodData.push(0);
                     srecYearly.push(Math.round(upfrontSrec));
@@ -640,63 +671,69 @@
                         initialOutlay: -upfrontOutlay, 
                         balance: currentBalance 
                     });
-                    if (currentBalance >= 0) paybackYear = 0;
+                    if (currentBalance >= 0) {
+                        paybackYear = 0; paybackYearLow = 0; paybackYearHigh = 0;
+                    }
                     continue;
                 }
-                const yrProd = annualProdBase * Math.pow(1 - solarDegrRate, yr - 1);
+                const yrProdBase = annualProdBase * Math.pow(1 - solarDegrRate, yr - 1);
+                const yrProd = yrProdBase;
+                const yrProdLow = yrProdBase * (1 - prodVariance);
+                const yrProdHigh = yrProdBase * (1 + prodVariance);
+
                 const yrRate = currentRate * Math.pow(1 + inflation, yr - 1);
                 const yrExportRate = exportRate * Math.pow(1 + inflation, yr - 1);
                 
-                let yrUsedDirectly = 0;
-                let yrSolarBatteryThroughput = 0;
-                for (let m = 0; m < 12; m++) {
-                    const daysInMonth = 30.4;
-                    const monthProd = (yrProd * solarWeights[m]) / 12;
-                    const monthUsage = (annualUsage * loadWeights[m]) / 12;
-                    const avgDailyProd = monthProd / daysInMonth;
-                    const avgDailyUsage = monthUsage / daysInMonth;
-                    const batteryToSolarRatio = avgDailyProd > 0 ? (currentBattKwh / avgDailyProd) : 1;
-                    const volatility = Math.min(0.95, 0.85 + (batteryToSolarRatio * 0.05));
-                    const dailyDirect = Math.min(avgDailyProd, avgDailyUsage * directUseRate);
-                    const excessSolar = Math.max(0, avgDailyProd - dailyDirect);
-                    const nightlyLoad = avgDailyUsage - dailyDirect;
-                    const dailyCapture = Math.min(excessSolar, currentBattKwh * 0.9, nightlyLoad / 0.9) * volatility;
-                    const captureDischarged = dailyCapture * 0.9;
-                    yrUsedDirectly += (dailyDirect + captureDischarged) * daysInMonth;
-                    yrSolarBatteryThroughput += captureDischarged * daysInMonth;
-                }
+                const calcYearSavings = (p) => {
+                    let used = 0;
+                    for (let m = 0; m < 12; m++) {
+                        const mProd = (p * solarWeights[m]) / 12;
+                        const mUsage = (annualUsage * loadWeights[m]) / 12;
+                        const avgDP = mProd / 30.4;
+                        const avgDU = mUsage / 30.4;
+                        const volatility = Math.min(0.95, 0.85 + ((avgDP > 0 ? (currentBattKwh / avgDP) : 1) * 0.05));
+                        const dDirect = Math.min(avgDP, avgDU * directUseRate);
+                        const mCapture = Math.min(Math.max(0, avgDP - dDirect), currentBattKwh * 0.94, (avgDU - dDirect) / 0.94) * volatility;
+                        used += (dDirect + (mCapture * 0.94)) * 30.4;
+                    }
+                    return (used * yrRate) + (Math.max(0, p - used) * yrExportRate);
+                };
+
+                const solarSavings = calcYearSavings(yrProd);
+                const solarSavingsLow = calcYearSavings(yrProdLow);
+                const solarSavingsHigh = calcYearSavings(yrProdHigh);
 
                 if (yr === 1) {
-                    yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedDirectly / yrProd) : 1.0;
-                    const solarCycles = effectiveBatterySize > 0 ? (yrSolarBatteryThroughput / effectiveBatterySize) : 0;
-                    // Coordinated Displacement: Solar cycles already perform arbitrage. 
-                    // We only add grid cycles that don't overlap with solar throughput.
+                    yr1SelfConsumptionPct = yrProd > 0 ? (solarSavings / (yrProd * yrRate)) : 1.0; // Approximation for KPI
+                    const solarCycles = effectiveBatterySize > 0 ? ((solarSavings - (yrProd * directUseRate * yrRate)) / (effectiveBatterySize * 0.94 * yrRate)) : 0; 
                     const extraGridCycles = sigAIEnabled ? Math.max(25, 150 - (solarCycles * 0.6)) : 0;
                     yr1TotalCycles = Math.round(solarCycles + extraGridCycles);
                 }
 
-                const yrInsurance = (solarCost * insuranceRate) * Math.pow(1 + inflation, yr - 1);
+                const yrInsurance = insuranceBase * Math.pow(1 + inflation, yr - 1);
                 const yrMaint = annualMaintBase * Math.pow(1 + inflation, yr - 1);
                 let yrReplacementCost = 0;
                 if (enableReplace && yr > 0 && yr % battReplaceYear === 0 && hasBattery) yrReplacementCost += battReplaceCost;
                 if (yr > 0 && yr % invReplaceYear === 0) yrReplacementCost += invReplaceCost;
                 
-                const solarSavings = (yrUsedDirectly * yrRate) + (Math.max(0, yrProd - yrUsedDirectly) * yrExportRate);
-                let yrSavings = solarSavings;
-                let arbSavings = 0;
+                let arbSavings = 0, arbSavingsLow = 0, arbSavingsHigh = 0;
 
                 if (sigAIEnabled && effectiveBatterySize > 0) {
                     const plcSavings = Math.min(3.0, currentBattKwh / 4.0) * 120 * 0.8 * Math.pow(1 + inflation, yr - 1);
+                    const netSpreadLow = Math.max(0, 0.04 - (0.15 * (0.02 + (yrRate - yrExportRate))));
+                    arbSavingsLow = Math.min(plcSavings + (currentBattKwh * 0.8 * 150 * netSpreadLow), (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavingsLow);
                     const netSpread = Math.max(0, arbitrageSpread - (0.15 * (0.02 + (yrRate - yrExportRate))));
-                    const energyArb = (currentBattKwh * 0.8 * 150 * netSpread);
-                    arbSavings = Math.min(plcSavings + energyArb, (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavings);
-                    yrSavings += arbSavings;
+                    arbSavings = Math.min(plcSavings + (currentBattKwh * 0.8 * 150 * netSpread), (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavings);
+                    const netSpreadHigh = Math.max(0, 0.12 - (0.15 * (0.02 + (yrRate - yrExportRate))));
+                    arbSavingsHigh = Math.min(plcSavings + (currentBattKwh * 0.8 * 150 * netSpreadHigh), (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavingsHigh);
                     if (yr === 1) year1ArbTotal = arbSavings;
                 }
                 
                 let srecIncome = (yr >= 1 && yr <= 6) ? annualSrecTail : 0;
-                const netAnnualCash = yrSavings + srecIncome - yrMaint - yrInsurance - yrReplacementCost;
-                currentBalance += netAnnualCash;
+                const expenses = yrMaint + yrInsurance + yrReplacementCost;
+                currentBalance += (solarSavings + arbSavings) + srecIncome - expenses;
+                currentBalanceLow += (solarSavingsLow + arbSavingsLow) + srecIncome - expenses;
+                currentBalanceHigh += (solarSavingsHigh + arbSavingsHigh) + srecIncome - expenses;
 
                 yearlyBreakdown.push({
                     year: yr, 
@@ -710,18 +747,27 @@
                 });
 
                 if (paybackYear === null && currentBalance >= 0) paybackYear = yr;
+                if (paybackYearLow === null && currentBalanceHigh >= 0) paybackYearLow = yr; // High production = Low payback
+                if (paybackYearHigh === null && currentBalanceLow >= 0) paybackYearHigh = yr; // Low production = High payback
+
                 flowData.push(Math.round(currentBalance));
+                flowDataLow.push(Math.round(currentBalanceLow));
+                flowDataHigh.push(Math.round(currentBalanceHigh));
                 healthData.push(currentBattKwh.toFixed(1));
                 prodData.push(Math.round(yrProd));
                 benchmarkData.push(Math.round((upfrontOutlay * Math.pow(1 + (globals.benchmarkRate/100 || 0.07), yr)) - upfrontOutlay));
                 currentBattKwh = Math.max(0, currentBattKwh - (effectiveBatterySize * battDegrRate));
             }
             return {
-                flowData, healthData, prodData, srecYearly, benchmarkData, yearlyBreakdown,
+                flowData, flowDataLow, flowDataHigh, healthData, prodData, srecYearly, benchmarkData, yearlyBreakdown,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
                 solarOffset: Math.round((annualProdBase / annualUsage) * 100),
-                paybackYear, lifetimeSavings: flowData[modelYears], year1ArbTotal,
+                paybackYear, paybackYearLow, paybackYearHigh, 
+                lifetimeSavings: flowData[modelYears], 
+                lifetimeSavingsLow: flowDataLow[modelYears],
+                lifetimeSavingsHigh: flowDataHigh[modelYears],
+                year1ArbTotal,
                 ppw: solarSize > 0 ? (solarCost / (solarSize * 1000)) : 0,
                 bpkwh: effectiveBatterySize > 0 ? (effectiveBatteryCost / effectiveBatterySize) : 0,
                 modelYears, solarSize, batterySize: effectiveBatterySize, hasBattery, sigAI: sigAIEnabled,
@@ -762,14 +808,91 @@
             document.querySelectorAll('#srecVal').forEach(el => el.innerText = formatCurrency(result.totalSrecValue));
             document.querySelectorAll('#netCost').forEach(el => el.innerText = formatCurrency(result.netCost));
             document.querySelectorAll('#solarOffset').forEach(el => el.innerText = result.solarOffset + "%");
-            document.querySelectorAll('#paybackYears').forEach(el => el.innerText = result.paybackYear ? result.paybackYear + " Yrs" : (result.modelYears + "+ Yrs"));
-            document.querySelectorAll('#lifetimeSavings').forEach(el => el.innerText = formatCurrency(result.lifetimeSavings));
+            document.querySelectorAll('#paybackYears').forEach(el => {
+                if (!compareMode) {
+                    const low = result.paybackYearLow;
+                    const high = result.paybackYearHigh;
+                    const mid = result.paybackYear;
+                    if (mid === null) {
+                        el.innerText = result.modelYears + "+ Yrs";
+                        el.classList.add('leading-none');
+                    } else {
+                        el.innerHTML = `<div>${mid} Yrs</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">Range: ${low || mid}-${high || result.modelYears + '+'} Yrs</div>`;
+                        el.classList.remove('leading-none');
+                    }
+                } else {
+                    el.innerText = result.paybackYear ? result.paybackYear + " Yrs" : (result.modelYears + "+ Yrs");
+                    el.classList.add('leading-none');
+                }
+            });
+            document.querySelectorAll('#lifetimeSavings').forEach(el => {
+                const breakdown = result.yearlyBreakdown.reduce((acc, curr) => {
+                    acc.srec += curr.srec || 0;
+                    acc.savings += curr.savings || 0;
+                    acc.arbitrage += curr.arbitrage || 0;
+                    acc.insurance += curr.insurance || 0;
+                    acc.maint += curr.maint || 0;
+                    acc.replacement += curr.replacement || 0;
+                    return acc;
+                }, { srec: 0, savings: 0, arbitrage: 0, insurance: 0, maint: 0, replacement: 0 });
+
+                const grossCost = (parseFloat(currentData.solarCost) || 0) + (result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0) + (parseFloat(globals.roofCost) || 0);
+                const utilityRebates = result.totalImmRebate;
+                const operatingExpenses = Math.abs(breakdown.insurance + breakdown.maint + breakdown.replacement);
+                
+                let tooltipHTML = `
+                    <div class="font-black text-[10px] uppercase tracking-widest text-emerald-400 mb-2 border-b border-white/10 pb-1">Lifetime Value (Net Profit)</div>
+                    <div class="space-y-1 text-[11px]">
+                        <div class="flex justify-between text-gray-400"><span>Gross System Cost:</span><span class="font-mono">-${formatCurrency(grossCost)}</span></div>
+                        <div class="flex justify-between text-emerald-400"><span>Utility Rebates:</span><span class="font-mono">+${formatCurrency(utilityRebates)}</span></div>
+                        <div class="flex justify-between text-emerald-400"><span>SREC Income:</span><span class="font-mono">+${formatCurrency(breakdown.srec)}</span></div>
+                        <div class="flex justify-between"><span>Solar Savings:</span><span class="font-mono">+${formatCurrency(breakdown.savings)}</span></div>
+                        <div class="flex justify-between"><span>Arbitrage:</span><span class="font-mono">+${formatCurrency(breakdown.arbitrage)}</span></div>
+                        <div class="flex justify-between text-red-300"><span>Operating Expenses:</span><span class="font-mono">-${formatCurrency(operatingExpenses)}</span></div>
+                        <div class="flex justify-between pt-1 mt-1 border-t border-white/10 font-black text-emerald-500"><span>Total Net Value:</span><span class="font-mono">${formatCurrency(result.lifetimeSavings)}</span></div>
+                    </div>
+                `;
+
+                if (result.sigAI && result.hasBattery && !compareMode) {
+                    const low = result.flowDataLow[result.modelYears];
+                    const high = result.flowDataHigh[result.modelYears];
+                    const mid = result.lifetimeSavings;
+                    const delta = Math.round((high - low) / 2);
+                    el.innerHTML = `<div>${formatCurrency(mid)}</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">± ${formatCurrency(delta)} Range</div>`;
+                    el.classList.remove('leading-none');
+                    
+                    tooltipHTML += `
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[10px] text-gray-400 leading-tight italic">
+                            The ± ${formatCurrency(delta)} range reflects market volatility in energy arbitrage spreads ($0.04 to $0.12/kWh) over ${result.modelYears} years.
+                        </div>
+                    `;
+                } else {
+                    el.innerText = formatCurrency(result.lifetimeSavings);
+                    el.classList.add('leading-none');
+                }
+                
+                const tooltipEl = el.parentElement.querySelector('#lifetimeTooltip');
+                if (tooltipEl) tooltipEl.innerHTML = tooltipHTML;
+            });
             const solarCost = parseFloat(currentData.solarCost) || 0;
             const batteryCost = result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0;
             const roofCost = parseFloat(globals.roofCost) || 0;
             const netInit = solarCost + batteryCost + roofCost - result.totalImmRebate - result.totalSrecValue;
-            let annualReturn = netInit > 0 ? (Math.pow((result.lifetimeSavings + netInit) / netInit, 1/result.modelYears) - 1) * 100 : 0;
-            document.querySelectorAll('#annualizedReturn').forEach(el => el.innerText = annualReturn.toFixed(1) + "%");
+            
+            const calcROI = (val) => netInit > 0 ? (Math.pow((val + netInit) / netInit, 1/result.modelYears) - 1) * 100 : 0;
+            const annualReturn = calcROI(result.lifetimeSavings);
+            const annualReturnLow = calcROI(result.lifetimeSavingsLow);
+            const annualReturnHigh = calcROI(result.lifetimeSavingsHigh);
+
+            document.querySelectorAll('#annualizedReturn').forEach(el => {
+                if (!compareMode) {
+                    el.innerHTML = `<div>${annualReturn.toFixed(1)}%</div><div class="text-[11px] font-black text-emerald-300/50 mt-1 uppercase tracking-widest">Range: ${annualReturnLow.toFixed(1)}% - ${annualReturnHigh.toFixed(1)}%</div>`;
+                    el.classList.remove('leading-none');
+                } else {
+                    el.innerText = annualReturn.toFixed(1) + "%";
+                    el.classList.add('leading-none');
+                }
+            });
             const row = document.getElementById('arbitrageRow');
             if (result.sigAI && result.hasBattery) {
                 row.classList.remove('hidden');
@@ -850,6 +973,7 @@
             };
             const datasets = [];
             const palette = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
+            
             allResults.forEach((r, i) => {
                 const sysName = systems[compareMode ? i : activeSystemIndex].systemName || ("Sys " + (i+1));
                 let borderColor = palette[i % palette.length];

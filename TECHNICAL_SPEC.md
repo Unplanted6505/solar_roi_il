@@ -37,33 +37,49 @@ The model uses monthly weights to simulate Illinois weather and seasonal usage p
 Daily savings are calculated via a volatility-adjusted simulation:
 1.  **Direct Use Rate:** Derived from user lifestyle (Standard: 25%, WFH: 35%, etc.).
 2.  **Daily Direct Use:** `min(Daily Production, Daily Load * Direct Use Rate)`.
-3.  **Battery Capture:** `min(Excess Solar, Effective Battery Capacity * 0.9, Nightly Load / 0.9) * Volatility`.
+3.  **Battery Capture:** `min(Excess Solar, Effective Battery Capacity * 0.94, Nightly Load / 0.94) * Volatility`.
 4.  **Volatility Factor:** `min(0.95, 0.85 + (Battery:Solar Ratio * 0.05))`. This rewards larger storage with higher capture reliability.
 
+### Weather & Production Volatility
+To account for inter-annual weather variation, the model calculates three distinct production paths:
+*   **Moderate (Expected):** 100% of P50 solar production estimate.
+*   **Low (Conservative):** 95% of P50 estimate (-5% variance).
+*   **High (Aggressive):** 105% of P50 estimate (+5% variance).
+
 ### Battery Efficiency
-*   **Round-Trip Efficiency:** Modeled as **81%**.
-*   Calculated as: `Captured Energy * 0.9` (Charge) followed by another `* 0.9` factor during discharge/offset.
+*   **Round-Trip Efficiency:** Modeled as **88%**.
+*   Calculated as: `Captured Energy * 0.94` (Charge) followed by another `* 0.94` factor during discharge/offset. Reflects modern high-voltage LFP storage.
 
 ---
 
 ## 3. Financial Formulas
 
 ### Annual Expenses
-*   **Insurance:** `Solar Array Cost * Insurance Rate (%)`. Default: 0.75%.
+*   **Insurance:** Flat annual dollar amount, inflation-adjusted. Default: **$150/year**. 
+    *   *Rationale:* Homeowner insurance adjustments for solar typically involve a policy rider or adjustment that does not scale strictly linearly with system cost.
 *   **Maintenance:** Flat annual fee, inflation-adjusted.
-*   **Component Replacement:** Sinking fund deduction at Year 12 (Battery) and Year 15 (Inverter).
+*   **Component Replacement:** Sinking fund deduction at Year 15 (Battery) and Year 15 (Inverter).
 
 ### Arbitrage & Grid Services (BESH/Hourly Pricing)
 Calculated if Intelligent Arbitrage is enabled:
 1.  **PLC Savings:** `min(Base PLC, Battery Size / 4) * $120 * 0.8 (Reliability Factor)`.
     *   *Audit Note:* The 0.8 factor accounts for the retroactive and predictive nature of identifying the 5 annual peak hours in the Illinois market.
 2.  **Energy Arbitrage:** `Battery Size * 0.8 (DoD) * 150 (EFC/yr) * Net Spread`.
-3.  **Net Spread:** `Arbitrage Spread - (0.15 * (0.02 + Delivery Rate))`.
+3. **Net Spread Visualization:** Modeled as a probability range on the ROI trajectory:
+    *   **Conservative Boundary:** $0.04/kWh
+    *   **Expected (Main Line):** $0.08/kWh
+    *   **Aggressive Boundary:** $0.12/kWh
+    *   *Calculation:* `Selected Spread - (0.15 * (0.02 + (Retail Rate - Export Rate)))`. (Adjusted for round-trip efficiency and delivery offset).
+    *   *Comparison Note:* In multi-system comparison mode, only the Expected ($0.08) scenario is displayed for clarity.
 4.  **Annual Equivalent Full Cycles (EFC) KPI:** `Total EFC = Solar EFC + max(25, 150 - (Solar EFC * 0.6))`. 
     *   *Coordinated Dispatch:* This models the "Displacement" effect where solar-charged energy already satisfies evening arbitrage windows. Grid-charging cycles are primarily used to "fill the gaps" during low-solar months. Provides a realistic throughput estimate for modern LFP systems.
 
-### Payback & ROI
-*   **Payback Period:** The first year where `Cumulative Cash Flow >= 0`.
+### Payback & ROI (Confidence Bands)
+The model rejects deterministic point estimates in favor of probabilistic ranges.
+1.  **Expected Value:** Based on Moderate Arbitrage and 100% Production.
+2.  **Conservative Boundary (Low ROI / High Payback):** Conservative Arbitrage + 95% Production.
+3.  **Aggressive Boundary (High ROI / Low Payback):** Aggressive Arbitrage + 105% Production.
+*   **Payback Period:** The first year where `Cumulative Cash Flow >= 0`. Shown as a range to communicate risk.
 *   **Net Investment:** `(Solar Cost + Battery Cost + Roof Cost) - (Upfront Rebates + Upfront SRECs)`.
 *   **Benchmark:** Comparison against an S&P 500 equivalent (Default 7% CAGR) using the same initial outlay.
 
@@ -75,4 +91,4 @@ Calculated if Intelligent Arbitrage is enabled:
     *   *Rationale:* While performance guarantees (warranties) often floor at 70% at Year 10 (3%/yr), LFP (Lithium Iron Phosphate) chemistry realistically performs closer to 1.5% in residential environments, hitting ~85% at Year 10.
 
 ---
-*Technical Spec Version: 1.1.0 (Audit Hardened - June 2026)*
+*Technical Spec Version: 1.2.0 (Confidence Band Update - June 2026)*
