@@ -752,9 +752,13 @@
 
                 if (yr === 1) {
                     yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedPhysically / yrProd) : 1.0; 
-                    const solarCycles = effectiveBatterySize > 0 ? ((yrUsedPhysically - (yrProd * directUseRate)) / (effectiveBatterySize * 0.94)) : 0; 
-                    const extraGridCycles = arbitrageEnabled ? Math.max(25, 150 - (Math.max(0, solarCycles) * 0.6)) : 0;
-                    yr1TotalCycles = Math.round(Math.max(0, solarCycles) + extraGridCycles);
+                    if (hasBattery && effectiveBatterySize > 0) {
+                        const solarCycles = ((yrUsedPhysically - (yrProd * directUseRate)) / (effectiveBatterySize * 0.94)); 
+                        const extraGridCycles = arbitrageEnabled ? Math.max(25, 150 - (Math.max(0, solarCycles) * 0.6)) : 0;
+                        yr1TotalCycles = Math.round(Math.max(0, solarCycles) + extraGridCycles);
+                    } else {
+                        yr1TotalCycles = 0;
+                    }
                 }
 
                 const yrInsurance = insuranceBase * Math.pow(1 + inflation, yr - 1);
@@ -1010,7 +1014,9 @@
                         if (m.isCurrency) displayVal = formatCurrency(rawVal);
                         else if (rawVal === null) displayVal = "N/A";
                         else if (typeof rawVal === 'number') {
-                            if (m.precision !== undefined) {
+                            if ((m.key === 'totalCycles' || m.key === 'batterySize') && rawVal === 0) {
+                                displayVal = "—";
+                            } else if (m.precision !== undefined) {
                                 displayVal = rawVal.toFixed(m.precision) + (m.suffix || "");
                             } else if (m.key === 'solarSize' || m.key === 'batterySize') {
                                 // Keep one decimal if it exists for kW/kWh, otherwise whole number
