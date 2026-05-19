@@ -943,6 +943,7 @@
                     { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true }
                 ];
                 const allResults = systems.map(s => calculateSystem(s, globals));
+                tbody.innerHTML = ""; // Clear existing rows
                 metrics.forEach(m => {
                     let row = `<tr class="group hover:bg-gray-50 transition-all"><td class="py-4 font-bold text-gray-400 uppercase text-[9px] tracking-wider">${m.label}</td>`;
                     allResults.forEach(r => {
