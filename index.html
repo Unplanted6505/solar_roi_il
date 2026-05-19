@@ -398,10 +398,9 @@
                         <p class="text-[10px] font-black text-emerald-800 uppercase tracking-[0.2em] mb-2">Breakeven</p>
                         <p id="paybackYears" class="text-2xl font-black text-emerald-600 leading-none">0 Yrs</p>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md tooltip">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Total Value</p>
+                    <div onclick="openLifetimeModal()" class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center transition-all hover:shadow-md cursor-pointer active:scale-95 group">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 group-hover:text-emerald-500 transition-colors">Total Value</p>
                         <p id="lifetimeSavings" class="text-2xl font-black text-emerald-700 leading-none">$0</p>
-                        <span id="lifetimeTooltip" class="tooltiptext"></span>
                     </div>
                     <div class="bg-emerald-900 p-6 rounded-3xl shadow-2xl shadow-emerald-900/30 border border-emerald-800 text-center col-span-2 sm:col-span-1 transition-all hover:scale-[1.03]">
                         <p class="text-[10px] font-black text-emerald-300 uppercase tracking-[0.2em] mb-2">Annual ROI</p>
@@ -485,6 +484,33 @@
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lifetime Value Breakdown Modal -->
+    <div id="lifetimeModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-lg font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Lifetime Value Breakdown</h3>
+                        <p id="lifetimeModalSubtitle" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Projected ROI Summary</p>
+                    </div>
+                    <button onclick="closeLifetimeModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div id="lifetimeModalContent" class="space-y-4 text-gray-600 dark:text-gray-300">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 text-center">
+                    <button onclick="closeLifetimeModal()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-200 dark:shadow-none">
+                        Close Analysis
+                    </button>
                 </div>
             </div>
         </div>
@@ -706,6 +732,9 @@
             let year1ArbTotal = 0;
             let yr1SelfConsumptionPct = 0;
             let yr1TotalCycles = 0;
+
+            let totalSolarSavings = 0, totalSolarSavingsLow = 0, totalSolarSavingsHigh = 0;
+            let totalArbSavings = 0, totalArbSavingsLow = 0, totalArbSavingsHigh = 0;
             
             const prodVariance = 0.05; // 5% weather/production variance
 
@@ -783,6 +812,10 @@
                 const resHigh = calcYearSavings(yrProdHigh);
                 const solarSavingsHigh = resHigh.savings;
 
+                totalSolarSavings += solarSavings;
+                totalSolarSavingsLow += solarSavingsLow;
+                totalSolarSavingsHigh += solarSavingsHigh;
+
                 if (yr === 1) {
                     yr1SelfConsumptionPct = yrProd > 0 ? (yrUsedPhysically / yrProd) : 1.0; 
                     if (hasBattery && effectiveBatterySize > 0) {
@@ -810,6 +843,11 @@
                     arbSavings = Math.min(plcSavings + (currentBattKwh * 0.8 * 150 * netSpread), (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavings);
                     const netSpreadHigh = Math.max(0, 0.12 - (0.15 * (0.02 + (yrRate - yrExportRate))));
                     arbSavingsHigh = Math.min(plcSavings + (currentBattKwh * 0.8 * 150 * netSpreadHigh), (annualUsage * yrRate) + (3.0 * 120 * Math.pow(1 + inflation, yr - 1)) - solarSavingsHigh);
+                    
+                    totalArbSavings += arbSavings;
+                    totalArbSavingsLow += arbSavingsLow;
+                    totalArbSavingsHigh += arbSavingsHigh;
+
                     if (yr === 1) year1ArbTotal = arbSavings;
                 }
                 
@@ -845,6 +883,8 @@
             return {
                 flowData, flowDataLow, flowDataHigh, healthData, prodData, srecYearly, benchmarkData, yearlyBreakdown,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
+                totalSolarSavings, totalSolarSavingsLow, totalSolarSavingsHigh,
+                totalArbSavings, totalArbSavingsLow, totalArbSavingsHigh,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
                 solarOffset: (annualProdBase / annualUsage) * 100,
                 paybackYear, paybackYearLow, paybackYearHigh, 
@@ -916,51 +956,103 @@
             document.querySelectorAll('#lifetimeSavings').forEach(el => {
                 const breakdown = result.yearlyBreakdown.reduce((acc, curr) => {
                     acc.srec += curr.srec || 0;
-                    acc.savings += curr.savings || 0;
-                    acc.arbitrage += curr.arbitrage || 0;
                     acc.insurance += curr.insurance || 0;
                     acc.maint += curr.maint || 0;
                     acc.replacement += curr.replacement || 0;
                     return acc;
-                }, { srec: 0, savings: 0, arbitrage: 0, insurance: 0, maint: 0, replacement: 0 });
+                }, { srec: 0, insurance: 0, maint: 0, replacement: 0 });
 
                 const grossCost = (parseFloat(currentData.solarCost) || 0) + (result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0) + (parseFloat(globals.roofCost) || 0);
                 const utilityRebates = result.totalImmRebate;
                 const operatingExpenses = Math.abs(breakdown.insurance + breakdown.maint + breakdown.replacement);
                 
-                let tooltipHTML = `
-                    <div class="font-black text-[10px] uppercase tracking-widest text-emerald-400 mb-2 border-b border-white/10 pb-1">Lifetime Value (Net Profit)</div>
-                    <div class="space-y-1 text-[11px]">
-                        <div class="flex justify-between text-gray-400"><span>Gross System Cost:</span><span class="font-mono">-${formatCurrency(grossCost)}</span></div>
-                        <div class="flex justify-between text-emerald-400"><span>Utility Rebates:</span><span class="font-mono">+${formatCurrency(utilityRebates)}</span></div>
-                        <div class="flex justify-between text-emerald-400"><span>SREC Income:</span><span class="font-mono">+${formatCurrency(breakdown.srec)}</span></div>
-                        <div class="flex justify-between"><span>Solar Savings:</span><span class="font-mono">+${formatCurrency(breakdown.savings)}</span></div>
-                        <div class="flex justify-between"><span>Arbitrage:</span><span class="font-mono">+${formatCurrency(breakdown.arbitrage)}</span></div>
-                        <div class="flex justify-between text-red-300"><span>Operating Expenses:</span><span class="font-mono">-${formatCurrency(operatingExpenses)}</span></div>
-                        <div class="flex justify-between pt-1 mt-1 border-t border-white/10 font-black text-emerald-500"><span>Total Net Value:</span><span class="font-mono">${formatCurrency(result.lifetimeSavings)}</span></div>
+                const formatRange = (mid, low, high) => {
+                    if (Math.abs(high - low) < 10) return `<span class="font-mono text-gray-900 dark:text-gray-100">${formatCurrency(mid)}</span>`;
+                    return `
+                        <div class="text-right">
+                            <div class="font-mono text-gray-900 dark:text-gray-100">${formatCurrency(mid)}</div>
+                            <div class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">${formatCurrency(low)} – ${formatCurrency(high)}</div>
+                        </div>
+                    `;
+                };
+
+                let modalHTML = `
+                    <div class="space-y-6">
+                        <!-- Initial Investment -->
+                        <div class="space-y-2">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-800 pb-1">Investment & Incentives</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Gross System Cost</span>
+                                <span class="font-mono text-red-400">-${formatCurrency(grossCost)}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-emerald-600 dark:text-emerald-400">Utility DG/Battery Rebates</span>
+                                <span class="font-mono text-emerald-500">+${formatCurrency(utilityRebates)}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-emerald-600 dark:text-emerald-400">SREC Income (15yr)</span>
+                                <span class="font-mono text-emerald-500">+${formatCurrency(breakdown.srec)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Operational Savings -->
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-800 pb-1">Performance Savings (${result.modelYears} yr)</p>
+                            <div class="flex justify-between items-start text-sm">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-700 dark:text-gray-200 font-bold">Solar Generation Savings</span>
+                                    <span class="text-[10px] text-gray-400">Direct use & grid export credits</span>
+                                </div>
+                                ${formatRange(result.totalSolarSavings, result.totalSolarSavingsLow, result.totalSolarSavingsHigh)}
+                            </div>
+                            <div class="flex justify-between items-start text-sm ${result.arbitrage && result.hasBattery ? '' : 'opacity-40'}">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-700 dark:text-gray-200 font-bold">Energy Arbitrage</span>
+                                    <span class="text-[10px] text-gray-400">TOU price optimization & peak shaving</span>
+                                </div>
+                                ${result.arbitrage && result.hasBattery ? formatRange(result.totalArbSavings, result.totalArbSavingsLow, result.totalArbSavingsHigh) : '<span class="font-mono">$0</span>'}
+                            </div>
+                        </div>
+
+                        <!-- Expenses -->
+                        <div class="space-y-2">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-800 pb-1">Ownership Expenses</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Maint, Insurance & Repairs</span>
+                                <span class="font-mono text-red-400">-${formatCurrency(operatingExpenses)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Final ROI -->
+                        <div class="pt-4 mt-2 border-t-2 border-emerald-500/20">
+                            <div class="flex justify-between items-start">
+                                <div class="flex flex-col">
+                                    <span class="text-lg font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Total Net Profit</span>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Cumulative Lifetime Value</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none">${formatCurrency(result.lifetimeSavings)}</div>
+                                    <div class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-tighter">Range: ${formatCurrency(result.lifetimeSavingsLow)} – ${formatCurrency(result.lifetimeSavingsHigh)}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
 
                 if (result.arbitrage && result.hasBattery && !compareMode) {
-                    const low = result.flowDataLow[result.modelYears];
-                    const high = result.flowDataHigh[result.modelYears];
                     const mid = result.lifetimeSavings;
-                    const delta = Math.round((high - low) / 2);
+                    const delta = Math.round((result.lifetimeSavingsHigh - result.lifetimeSavingsLow) / 2);
                     el.innerHTML = `<div>${formatCurrency(mid)}</div><div class="text-[11px] font-black text-gray-400 mt-1 uppercase tracking-widest">± ${formatCurrency(delta)}</div>`;
                     el.classList.remove('leading-none');
-                    
-                    tooltipHTML += `
-                        <div class="mt-3 pt-2 border-t border-white/10 text-[10px] text-gray-400 leading-tight italic">
-                            The ± ${formatCurrency(delta)} range reflects market volatility in energy arbitrage spreads ($0.04 to $0.12/kWh) over ${result.modelYears} years.
-                        </div>
-                    `;
                 } else {
                     el.innerText = formatCurrency(result.lifetimeSavings);
                     el.classList.add('leading-none');
                 }
                 
-                const tooltipEl = el.parentElement.querySelector('#lifetimeTooltip');
-                if (tooltipEl) tooltipEl.innerHTML = tooltipHTML;
+                const modalContent = document.getElementById('lifetimeModalContent');
+                if (modalContent) modalContent.innerHTML = modalHTML;
+                const modalSubtitle = document.getElementById('lifetimeModalSubtitle');
+                if (modalSubtitle) modalSubtitle.innerText = (currentData.systemName || "System Analysis") + " - " + result.modelYears + " Year Projection";
             });
             const solarCost = parseFloat(currentData.solarCost) || 0;
             const batteryCost = result.hasBattery ? (parseFloat(currentData.batteryCost) || 0) : 0;
@@ -1328,6 +1420,16 @@
         function exportData() { saveInputs(); const stored = localStorage.getItem('solarRoiSystemsV3'); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(stored); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "solar_roi_data.json"); dl.click(); }
         function importData() { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { const reader = new FileReader(); reader.readAsText(e.target.files[0], 'UTF-8'); reader.onload = ev => { try { const content = JSON.parse(ev.target.result); if (content.systems) { localStorage.setItem('solarRoiSystemsV3', JSON.stringify(content)); loadInputs(); renderTabs(); calculate(); } } catch (err) { alert("Invalid JSON"); } } }; input.click(); }
 
+        function openLifetimeModal() {
+            const modal = document.getElementById('lifetimeModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeLifetimeModal() {
+            const modal = document.getElementById('lifetimeModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
         function openArbitrageModal() {
             const modal = document.getElementById('explainerModal');
             if (modal) modal.classList.remove('hidden');
@@ -1379,6 +1481,10 @@
                 const modal = document.getElementById('explainerModal');
                 if (modal && e.target === modal) {
                     closeExplainerModal();
+                }
+                const lModal = document.getElementById('lifetimeModal');
+                if (lModal && e.target === lModal) {
+                    closeLifetimeModal();
                 }
             });
         };
