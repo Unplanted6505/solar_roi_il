@@ -782,7 +782,7 @@
                 flowData, flowDataLow, flowDataHigh, healthData, prodData, srecYearly, benchmarkData, yearlyBreakdown,
                 dgRebate, batteryRebate, totalImmRebate, totalSrecValue,
                 netCost: (solarCost + effectiveBatteryCost + roofCost - totalImmRebate - totalSrecValue),
-                solarOffset: Math.round((annualProdBase / annualUsage) * 100),
+                solarOffset: (annualProdBase / annualUsage) * 100,
                 paybackYear, paybackYearLow, paybackYearHigh, 
                 lifetimeSavings: flowData[modelYears], 
                 lifetimeSavingsLow: flowDataLow[modelYears],
@@ -809,7 +809,7 @@
             
             // Update Self-Consumption Widget
             const scDisp = document.getElementById('selfConsumptionDisp');
-            if (scDisp) scDisp.innerText = Math.round(result.selfConsumptionPct) + "%";
+            if (scDisp) scDisp.innerText = result.selfConsumptionPct.toFixed(1) + "%";
 
             // Update Cycles KPI
             const cycleDisp = document.getElementById('totalCycles');
@@ -827,7 +827,7 @@
             document.querySelectorAll('#totalRebateVal').forEach(el => el.innerText = formatCurrency(result.totalImmRebate));
             document.querySelectorAll('#srecVal').forEach(el => el.innerText = formatCurrency(result.totalSrecValue));
             document.querySelectorAll('#netCost').forEach(el => el.innerText = formatCurrency(result.netCost));
-            document.querySelectorAll('#solarOffset').forEach(el => el.innerText = result.solarOffset + "%");
+            document.querySelectorAll('#solarOffset').forEach(el => el.innerText = result.solarOffset.toFixed(1) + "%");
             document.querySelectorAll('#paybackYears').forEach(el => {
                 if (!compareMode) {
                     const low = result.paybackYearLow;
@@ -950,11 +950,12 @@
                 const metrics = [
                     { label: "Solar Size", key: "solarSize", suffix: " kW" },
                     { label: "Battery", key: "batterySize", suffix: " kWh" },
-                    { label: "Energy Offset", key: "solarOffset", suffix: "%" },
+                    { label: "Energy Offset", key: "solarOffset", suffix: "%", precision: 1 },
+                    { label: "Self-Consumption", key: "selfConsumptionPct", suffix: "%", better: 'higher', precision: 1 },
                     { label: "Cycles/Yr", key: "totalCycles", suffix: "" },
                     { label: "Net Cost", key: "netCost", isCurrency: true, better: 'lower' },
                     { label: "Payback", key: "paybackYear", suffix: " Yrs", better: 'lower' },
-                    { label: "Annual ROI", key: "annualROI", suffix: "%", better: 'higher' },
+                    { label: "Annual ROI", key: "annualROI", suffix: "%", better: 'higher', precision: 1 },
                     { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true, better: 'higher' }
                 ];
 
@@ -977,7 +978,16 @@
                         let displayVal = rawVal;
                         if (m.isCurrency) displayVal = formatCurrency(rawVal);
                         else if (rawVal === null) displayVal = "N/A";
-                        else if (typeof rawVal === 'number' && m.key === 'annualROI') displayVal = rawVal.toFixed(1) + m.suffix;
+                        else if (typeof rawVal === 'number') {
+                            if (m.precision !== undefined) {
+                                displayVal = rawVal.toFixed(m.precision) + (m.suffix || "");
+                            } else if (m.key === 'solarSize' || m.key === 'batterySize') {
+                                // Keep one decimal if it exists for kW/kWh, otherwise whole number
+                                displayVal = (rawVal % 1 === 0 ? rawVal : rawVal.toFixed(1)) + (m.suffix || "");
+                            } else {
+                                displayVal = Math.round(rawVal) + (m.suffix || "");
+                            }
+                        }
                         else displayVal = rawVal + (m.suffix || "");
 
                         row += `<td class="py-4 text-center font-black ${isActive ? 'bg-emerald-50/30' : ''} ${isBest ? 'text-emerald-600' : 'text-gray-900 dark:text-gray-100'}">
