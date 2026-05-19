@@ -35,6 +35,11 @@
             line-height: 1.6;
             pointer-events: none;
         }
+        .tooltip .tooltiptext.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
         /* Mobile adjustment for narrow screens */
         @media (max-width: 640px) {
             .tooltip .tooltiptext {
@@ -52,10 +57,12 @@
             border-style: solid;
             border-color: transparent transparent #1e293b transparent;
         }
-        .tooltip:hover .tooltiptext, .tooltip:active .tooltiptext { 
-            visibility: visible; 
-            opacity: 1; 
-            pointer-events: auto;
+        @media (min-width: 1024px) {
+            .tooltip:hover .tooltiptext { 
+                visibility: visible; 
+                opacity: 1; 
+                pointer-events: auto;
+            }
         }
         input[type=range] { accent-color: #10b981; }
         .spectrum-bar { height: 8px; border-radius: 4px; background: linear-gradient(to right, #10b981, #fbbf24, #ef4444); position: relative; }
@@ -976,11 +983,31 @@
             const breakevenLinePlugin = { 
                 id: 'breakevenLine', 
                 afterDraw: (chart) => { 
-                    if (paybackYear !== null && paybackYear >= 0) { 
+                    if (paybackYear !== null && paybackYear >= 0 && paybackYear <= labels.length) { 
                         const {ctx, chartArea, scales: {x}} = chart; 
                         const xPos = x.getPixelForValue(labels[paybackYear]); 
-                        ctx.save(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.moveTo(xPos, chartArea.top); ctx.lineTo(xPos, chartArea.bottom); ctx.lineWidth = 2; ctx.strokeStyle = '#10b981'; ctx.stroke(); 
-                        ctx.fillStyle = '#10b981'; ctx.font = 'black 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BREAKEVEN', xPos, chartArea.top - 15); ctx.restore(); 
+                        ctx.save(); 
+                        ctx.beginPath(); 
+                        ctx.setLineDash([5, 5]); 
+                        ctx.moveTo(xPos, chartArea.top); 
+                        ctx.lineTo(xPos, chartArea.bottom); 
+                        ctx.lineWidth = 2; 
+                        ctx.strokeStyle = '#10b981'; 
+                        ctx.stroke(); 
+                        
+                        ctx.fillStyle = '#10b981'; 
+                        ctx.font = '900 10px sans-serif'; 
+                        ctx.textAlign = 'center'; 
+                        // Draw box background for title to ensure readability
+                        const text = 'BREAKEVEN';
+                        const metrics = ctx.measureText(text);
+                        ctx.globalAlpha = 0.8;
+                        ctx.fillStyle = isDark ? '#0f172a' : '#fff';
+                        ctx.fillRect(xPos - (metrics.width/2) - 4, chartArea.top - 25, metrics.width + 8, 14);
+                        ctx.globalAlpha = 1.0;
+                        ctx.fillStyle = '#10b981';
+                        ctx.fillText(text, xPos, chartArea.top - 14); 
+                        ctx.restore(); 
                     } 
                 } 
             };
@@ -1034,9 +1061,25 @@
                 plugins: [breakevenLinePlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { top: 35, bottom: 10 } },
                     interaction: { mode: 'index', intersect: false },
+                    onClick: (e, elements, chart) => {
+                        if (elements.length === 0) {
+                            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                            chart.update();
+                        }
+                    },
                     plugins: {
-                        legend: { display: compareMode, position: 'top', labels: { color: textColor, font: { weight: 'bold', size: 10 } } },
+                        legend: { 
+                            display: compareMode, 
+                            position: 'top', 
+                            align: 'end',
+                            labels: { 
+                                color: textColor, 
+                                boxWidth: 12,
+                                font: { weight: 'bold', size: 10 } 
+                            } 
+                        },
                         tooltip: {
                             backgroundColor: isDark ? '#1e293b' : '#fff',
                             titleColor: isDark ? '#f8fafc' : '#1e293b',
@@ -1188,6 +1231,24 @@
             
             renderTabs(); 
             calculate(); 
+
+            // Tooltip toggle for mobile
+            document.querySelectorAll('.tooltip').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (window.innerWidth < 1024) {
+                        e.stopPropagation();
+                        const text = el.querySelector('.tooltiptext');
+                        const isVisible = text.classList.contains('visible');
+                        // Close all others
+                        document.querySelectorAll('.tooltiptext').forEach(t => t.classList.remove('visible'));
+                        if (!isVisible) text.classList.add('visible');
+                    }
+                });
+            });
+
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.tooltiptext').forEach(t => t.classList.remove('visible'));
+            });
         };
     </script>
 </body>
