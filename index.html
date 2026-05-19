@@ -928,30 +928,64 @@
             if (compareMode) {
                 compView.classList.remove('hidden');
                 tableTitle.innerText = "Comparative System Analysis";
+                
+                const allResults = systems.map(s => {
+                    const r = calculateSystem(s, globals);
+                    const netInit = (parseFloat(s.solarCost) || 0) + (r.hasBattery ? (parseFloat(s.batteryCost) || 0) : 0) + (parseFloat(globals.roofCost) || 0) - r.totalImmRebate - r.totalSrecValue;
+                    r.annualROI = netInit > 0 ? (Math.pow((r.lifetimeSavings + netInit) / netInit, 1/r.modelYears) - 1) * 100 : 0;
+                    return r;
+                });
+
                 let headerRow = `<tr class="border-b-2 border-gray-50"><th class="py-4 text-[10px] uppercase text-gray-400 tracking-widest font-black">Metric</th>`;
-                systems.forEach(s => {
-                    headerRow += `<th class="py-4 text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px] font-black text-emerald-700" title="${s.systemName}">${s.systemName || "Unnamed"}</th>`;
+                systems.forEach((s, i) => {
+                    const isActive = i === activeSystemIndex;
+                    headerRow += `<th class="py-4 text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px] font-black ${isActive ? 'text-emerald-600 bg-emerald-50/50 rounded-t-2xl' : 'text-gray-400'}" title="${s.systemName}">
+                        ${isActive ? '<span class="text-[8px] block mb-1 opacity-50 uppercase tracking-tighter">Active</span>' : ''}
+                        ${s.systemName || "Unnamed"}
+                    </th>`;
                 });
                 headerRow += "</tr>";
                 compTable.querySelector('thead').innerHTML = headerRow;
+
                 const metrics = [
                     { label: "Solar Size", key: "solarSize", suffix: " kW" },
                     { label: "Battery", key: "batterySize", suffix: " kWh" },
+                    { label: "Energy Offset", key: "solarOffset", suffix: "%" },
                     { label: "Cycles/Yr", key: "totalCycles", suffix: "" },
-                    { label: "Net Cost", key: "netCost", isCurrency: true },
-                    { label: "Payback", key: "paybackYear", suffix: " Yrs" },
-                    { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true }
+                    { label: "Net Cost", key: "netCost", isCurrency: true, better: 'lower' },
+                    { label: "Payback", key: "paybackYear", suffix: " Yrs", better: 'lower' },
+                    { label: "Annual ROI", key: "annualROI", suffix: "%", better: 'higher' },
+                    { label: "LTD Profit", key: "lifetimeSavings", isCurrency: true, better: 'higher' }
                 ];
-                const allResults = systems.map(s => calculateSystem(s, globals));
-                tbody.innerHTML = ""; // Clear existing rows
+
+                tbody.innerHTML = "";
                 metrics.forEach(m => {
-                    let row = `<tr class="group hover:bg-gray-50 transition-all"><td class="py-4 font-bold text-gray-400 uppercase text-[9px] tracking-wider">${m.label}</td>`;
-                    allResults.forEach(r => {
-                        let val = r[m.key];
-                        if (m.isCurrency) val = formatCurrency(val);
-                        else if (val === null) val = "N/A";
-                        else val = val + (m.suffix || "");
-                        row += `<td class="py-4 text-center font-black text-gray-900 dark:text-gray-100">${val}</td>`;
+                    let bestVal = null;
+                    if (m.better) {
+                        const vals = allResults.map(r => r[m.key]).filter(v => v !== null);
+                        if (vals.length > 1) {
+                            bestVal = m.better === 'higher' ? Math.max(...vals) : Math.min(...vals);
+                        }
+                    }
+
+                    let row = `<tr class="group hover:bg-gray-50/50 transition-all border-b border-gray-50/50"><td class="py-4 font-bold text-gray-400 uppercase text-[9px] tracking-wider">${m.label}</td>`;
+                    allResults.forEach((r, i) => {
+                        const isActive = i === activeSystemIndex;
+                        let rawVal = r[m.key];
+                        let isBest = m.better && rawVal === bestVal;
+                        
+                        let displayVal = rawVal;
+                        if (m.isCurrency) displayVal = formatCurrency(rawVal);
+                        else if (rawVal === null) displayVal = "N/A";
+                        else if (typeof rawVal === 'number' && m.key === 'annualROI') displayVal = rawVal.toFixed(1) + m.suffix;
+                        else displayVal = rawVal + (m.suffix || "");
+
+                        row += `<td class="py-4 text-center font-black ${isActive ? 'bg-emerald-50/30' : ''} ${isBest ? 'text-emerald-600' : 'text-gray-900 dark:text-gray-100'}">
+                            <div class="flex items-center justify-center gap-1">
+                                ${displayVal}
+                                ${isBest ? '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' : ''}
+                            </div>
+                        </td>`;
                     });
                     row += "</tr>";
                     tbody.innerHTML += row;
