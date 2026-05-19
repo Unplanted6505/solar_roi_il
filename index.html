@@ -213,83 +213,37 @@
                                     </select>
                                 </div>
                                 <div class="col-span-2 pt-2 border-t border-gray-200/50 space-y-4">
-                                    <div class="grid grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-3 gap-3">
                                         <div>
-                                            <label class="block text-[9px] font-black text-emerald-700 mb-1 uppercase tracking-widest text-center">Rate Escalation (%)</label>
-                                            <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-sm font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
+                                            <label class="block text-[8px] font-black text-emerald-700 mb-1 uppercase tracking-tighter text-center leading-none h-4 flex items-center justify-center">Rate Esc. %</label>
+                                            <input type="number" id="inflation" value="3" oninput="calculate()" class="w-full rounded-xl border-emerald-100 p-2 text-xs font-black text-center text-emerald-800 bg-emerald-50/50 focus:bg-white transition-all">
                                         </div>
                                         <div>
-                                            <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Insurance ($/yr)</label>
-                                            <input type="number" id="annualInsurance" step="10" value="150" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                            <label class="block text-[8px] font-black text-gray-500 mb-1 uppercase tracking-tighter text-center leading-none h-4 flex items-center justify-center">Insurance $</label>
+                                            <input type="number" id="annualInsurance" step="10" value="150" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-xs font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[8px] font-black text-gray-500 mb-1 uppercase tracking-tighter text-center leading-none h-4 flex items-center justify-center">Benchmark %</label>
+                                            <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-xs font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-4 items-center">
-                                        <div>
-                                            <label class="block text-[9px] font-black text-gray-500 mb-1 uppercase tracking-widest text-center">Benchmark % (S&P)</label>
-                                            <input type="number" id="benchmarkRate" step="0.1" value="7.0" oninput="calculate()" class="w-full rounded-xl border-gray-200 p-2 text-sm font-black text-center text-gray-800 bg-gray-50/50 focus:bg-white transition-all">
+                                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100/50">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="disableBattery" onchange="calculate()" class="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0">
+                                            <label for="disableBattery" class="ml-1.5 text-[9px] font-black text-blue-800 uppercase tracking-widest whitespace-nowrap">Disable Battery</label>
                                         </div>
-                                        <div class="flex flex-col justify-center space-y-2">
-                                            <div class="flex items-center">
-                                                <input type="checkbox" id="disableBattery" onchange="calculate()" class="h-4 w-4 text-blue-600 border-gray-300 rounded flex-shrink-0">
-                                                <label for="disableBattery" class="ml-2 text-[9px] font-black text-blue-800 uppercase tracking-widest whitespace-nowrap">Disable Battery</label>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <input type="checkbox" id="enableArbitrage" checked onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded flex-shrink-0">
-                                                <label for="enableArbitrage" class="ml-2 text-[9px] font-black text-emerald-800 uppercase tracking-widest whitespace-nowrap">Enable Arbitrage</label>
-                                                <div class="ml-1 flex-shrink-0">
-                                                <button onclick="openArbitrageModal()" class="p-1 text-emerald-400 hover:text-emerald-600 transition-colors">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                </button>
-                                            </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="enableArbitrage" checked onchange="calculate()" class="h-4 w-4 text-emerald-600 border-gray-300 rounded flex-shrink-0">
+                                            <label for="enableArbitrage" class="ml-1.5 text-[9px] font-black text-emerald-800 uppercase tracking-widest whitespace-nowrap">Enable Arbitrage</label>
+                                            <button onclick="openArbitrageModal()" class="ml-1 p-1 text-emerald-400 hover:text-emerald-600 transition-colors flex-shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Arbitrage Explainer Modal -->
-                        <div id="explainerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-                            <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in duration-200">
-                                <div class="p-8">
-                                    <div class="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h3 class="text-lg font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">What is Arbitrage?</h3>
-                                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Optimization Strategy</p>
-                                        </div>
-                                        <button onclick="closeExplainerModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
-                                        <p>Arbitrage (or Load Shifting) maximizes your ROI by charging your battery when power is cheap (solar or off-peak grid) and discharging it when utility rates are high.</p>
-                                        <p class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl text-emerald-800 dark:text-emerald-300 font-medium">
-                                            This logic typically adds <span class="font-black">$250 – $500/year</span> in extra savings depending on your battery size and utility rates.
-                                        </p>
-                                        
-                                        <div class="pt-4 border-t border-gray-100 dark:border-slate-800">
-                                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Manufacturer Guides</p>
-                                            <div class="grid gap-3">
-                                                <a href="https://www.tesla.com/support/energy/powerwall/mobile-app/time-based-control" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
-                                                    <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Tesla: Time-Based Control</span>
-                                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                                </a>
-                                                <a href="https://support.enphase.com/s/article/which-system-profile-should-i-choose-for-my-enphase-energy-system" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
-                                                    <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Enphase: Savings Mode</span>
-                                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                                </a>
-                                                <a href="https://www.sigenergy.com/uploads/en_download/1748413421183055.pdf#page=22" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
-                                                    <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Sigenergy: Sigen AI Mode</span>
-                                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                            </div>
-                        </div>
                         
                         <!-- Active System -->
                         <div class="space-y-6">
@@ -488,6 +442,48 @@
                     <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-400 mb-8 text-[10px] uppercase tracking-[0.2em] text-center">Annual Generation: Solar Yield</h3>
                         <div class="h-[200px] md:h-[220px]"><canvas id="prodChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Arbitrage Explainer Modal -->
+    <div id="explainerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-lg font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">What is Arbitrage?</h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Optimization Strategy</p>
+                    </div>
+                    <button onclick="closeExplainerModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4 text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
+                    <p>Arbitrage (or Load Shifting) maximizes your ROI by charging your battery when power is cheap (solar or off-peak grid) and discharging it when utility rates are high.</p>
+                    <p class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl text-emerald-800 dark:text-emerald-300 font-medium">
+                        This logic typically adds <span class="font-black">$250 – $500/year</span> in extra savings depending on your battery size and utility rates.
+                    </p>
+                    
+                    <div class="pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Manufacturer Guides</p>
+                        <div class="grid gap-3">
+                            <a href="https://www.tesla.com/support/energy/powerwall/mobile-app/time-based-control" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
+                                <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Tesla: Time-Based Control</span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                            <a href="https://support.enphase.com/s/article/which-system-profile-should-i-choose-for-my-enphase-energy-system" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
+                                <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Enphase: Savings Mode</span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                            <a href="https://www.sigenergy.com/uploads/en_download/1748413421183055.pdf#page=22" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all group">
+                                <span class="font-bold text-gray-700 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Sigenergy: Sigen AI Mode</span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
