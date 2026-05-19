@@ -998,15 +998,16 @@
                         ctx.fillStyle = '#10b981'; 
                         ctx.font = '900 10px sans-serif'; 
                         ctx.textAlign = 'center'; 
+                        ctx.textBaseline = 'middle';
                         // Draw box background for title to ensure readability
                         const text = 'BREAKEVEN';
                         const metrics = ctx.measureText(text);
                         ctx.globalAlpha = 0.8;
                         ctx.fillStyle = isDark ? '#0f172a' : '#fff';
-                        ctx.fillRect(xPos - (metrics.width/2) - 4, chartArea.top - 25, metrics.width + 8, 14);
+                        ctx.fillRect(xPos - (metrics.width/2) - 4, chartArea.top - 26, metrics.width + 8, 14);
                         ctx.globalAlpha = 1.0;
                         ctx.fillStyle = '#10b981';
-                        ctx.fillText(text, xPos, chartArea.top - 14); 
+                        ctx.fillText(text, xPos, chartArea.top - 19); 
                         ctx.restore(); 
                     } 
                 } 
