@@ -716,7 +716,11 @@
             const dgRebate = solarSize * 300;
             const batteryRebate = hasBattery ? (batterySize * 300) : 0;
             const totalImmRebate = dgRebate + batteryRebate;
-            const totalSrecValue = ((annualProdBase * 15 * finalSPrice) / 1000) * (1 - (srecFeePct / 100));
+            let totalSrecProd = 0;
+            for (let i = 0; i < 15; i++) {
+                totalSrecProd += annualProdBase * Math.pow(1 - solarDegrRate, i);
+            }
+            const totalSrecValue = (totalSrecProd * finalSPrice / 1000) * (1 - (srecFeePct / 100));
             const upfrontSrec = totalSrecValue * 0.5;
             const annualSrecTail = (totalSrecValue * 0.5) / 6;
             
