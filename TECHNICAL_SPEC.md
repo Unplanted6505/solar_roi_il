@@ -21,6 +21,7 @@ This document details the mathematical framework, constants, and simulation logi
 *   **SREC Base Rate (Illinois Shines):**
     *   ComEd: $78/SREC (+$20 for Direct Ownership).
     *   Ameren: $70/SREC (+$20 for Direct Ownership).
+    *   *Note:* Total SREC value is calculated on the 15-year sum of production after accounting for annual solar degradation.
 *   **SREC Payout:** 50% Upfront (Year 0), 50% Tail (spread over Years 1-6).
 *   **SREC Fee:** Default 15% (Brokerage/Aggregator fee).
 

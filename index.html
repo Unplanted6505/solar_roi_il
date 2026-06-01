@@ -678,34 +678,43 @@
         }
 
         function calculateSystem(data, globals) {
-            const getVal = (id) => (data && data[id] !== undefined) ? data[id] : defaultSystem[id];
+            const getVal = (id) => (data && data[id] !== undefined && data[id] !== "") ? data[id] : defaultSystem[id];
+            const getNum = (id) => {
+                const n = parseFloat(getVal(id));
+                return isNaN(n) ? (defaultSystem[id] || 0) : n;
+            };
+            const getGlobalNum = (id) => {
+                const n = parseFloat(globals[id]);
+                return isNaN(n) ? (defaultGlobals[id] || 0) : n;
+            };
+
             const utility = getVal('utility') || 'comed';
             const ownership = getVal('ownership') || 'owned';
-            const annualUsage = parseFloat(globals.annualUsage) || 0;
-            const roofCost = parseFloat(globals.roofCost) || 0;
+            const annualUsage = getGlobalNum('annualUsage');
+            const roofCost = getGlobalNum('roofCost');
             const modelYears = parseInt(globals.modelYears) || 25;
-            const inflation = parseFloat(globals.inflation) / 100;
-            const annualProdBase = parseFloat(getVal('manualProduction')) || 0;
-            const solarCost = parseFloat(getVal('solarCost')) || 0;
-            const batteryCost = parseFloat(getVal('batteryCost')) || 0;
-            const solarSize = parseFloat(getVal('solarSize')) || 0;
-            const batterySize = parseFloat(getVal('batterySize')) || 0;
+            const inflation = getGlobalNum('inflation') / 100;
+            const annualProdBase = getNum('manualProduction');
+            const solarCost = getNum('solarCost');
+            const batteryCost = getNum('batteryCost');
+            const solarSize = getNum('solarSize');
+            const batterySize = getNum('batterySize');
             const hasBattery = globals.disableBattery === true || globals.disableBattery === "true" ? false : true;
-            const solarDegrRate = parseFloat(getVal('solarDegradation') !== undefined ? getVal('solarDegradation') : 0.5) / 100;
-            const battDegrRate = parseFloat(getVal('battDegradation') !== undefined ? getVal('battDegradation') : 2.5) / 100;
+            const solarDegrRate = getNum('solarDegradation') / 100;
+            const battDegrRate = getNum('battDegradation') / 100;
             const enableReplace = getVal('enableReplace') === true || getVal('enableReplace') === "true";
-            const battReplaceYear = parseInt(getVal('battReplaceYear') || 15);
-            const battReplaceCost = parseFloat(getVal('battReplaceCost') || 8000);
-            const invReplaceYear = parseInt(getVal('invReplaceYear') || 15);
-            const invReplaceCost = parseFloat(getVal('invReplaceCost') || 2500);
-            const annualMaintBase = parseFloat(getVal('annualMaint') || 250);
-            const insuranceBase = parseFloat(globals.annualInsurance) || 150;
+            const battReplaceYear = parseInt(getVal('battReplaceYear')) || 15;
+            const battReplaceCost = getNum('battReplaceCost');
+            const invReplaceYear = parseInt(getVal('invReplaceYear')) || 15;
+            const invReplaceCost = getNum('invReplaceCost');
+            const annualMaintBase = getNum('annualMaint');
+            const insuranceBase = getGlobalNum('annualInsurance');
             const arbitrageEnabled = globals.enableArbitrage === true || globals.enableArbitrage === "true";
             const arbitrageSpread = 0.08;
-            const benchmarkRate = (parseFloat(globals.benchmarkRate) || 7) / 100;
+            const benchmarkRate = getGlobalNum('benchmarkRate') / 100;
             const lifestyle = getVal('lifestyle') || 'standard';
-            const srecFeePct = parseFloat(getVal('srecFee') !== undefined ? getVal('srecFee') : 15);
-            const baseSrecInput = parseFloat(getVal('srecPrice') || 0);
+            const srecFeePct = getNum('srecFee');
+            const baseSrecInput = getNum('srecPrice');
             
             const sPrice = baseSrecInput || (utility === 'comed' ? 78 : 70);
             const finalSPrice = ownership === 'owned' ? sPrice + 20 : sPrice;
